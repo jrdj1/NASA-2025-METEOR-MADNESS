@@ -105,19 +105,42 @@ def get_recent_neos():
     if not api_key:
         return {"error": "API key not found"}
     
+    # We fetch try to fetch the data from cache first
+    try:
+        with open("resources/recent_neos_cache.json", "r") as file:
+            cached_data = json.load(file)
+            cache_date = cached_data.get("cache_date")
+            if cache_date == datetime.date.today().strftime("%Y-%m-%d"):
+                print("Loaded from cache")
+                return cached_data["neos"]  # Return cached data if it's from today
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass  # No valid cache found, proceed to fetch new data
+
     # Get current week's NEO feed data
     data = get_neows_data_feed(api_key)
-    
+    print("Fetched new data from API")
+
     if "near_earth_objects" not in data:
         return {"error": "Invalid data format"}
     
     neos = data["near_earth_objects"]
     today = datetime.date.today().strftime("%Y-%m-%d")
+    tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    print(f"Today: {today}, Tomorrow: {tomorrow}")
     data_neos = []
     for date, objects in neos.items():
         if date == today:
             data_neos = objects
-            break
+        elif date == tomorrow:
+            data_neos.extend(objects)
+
+    #Saving to cache
+    with open("resources/recent_neos_cache.json", "w") as file:
+        json.dump({
+            "cache_date": datetime.date.today().strftime("%Y-%m-%d"),
+            "neos": data_neos
+        }, file, indent=4)
+    
     return data_neos
 
 if __name__ == "__main__":
