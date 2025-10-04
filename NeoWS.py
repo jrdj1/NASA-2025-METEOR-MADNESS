@@ -130,7 +130,7 @@ def get_recent_neos():
     data_neos = []
     for date, objects in neos.items():
         if date == today:
-            data_neos = objects
+            data_neos.extend(objects)
         elif date == tomorrow:
             data_neos.extend(objects)
 
