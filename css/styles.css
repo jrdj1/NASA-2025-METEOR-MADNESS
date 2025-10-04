@@ -29,41 +29,16 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
 /* Real mode layout */
 .real-mode-layout {
   display: flex;
-  gap: 40px;
-  align-items: flex-start;
-  max-width: 1200px;
+  justify-content: center;
+  max-width: 1400px;
   width: 100%;
   margin-top: 20px;
 }
 
-.real-mode-text {
-  flex: 0 0 300px;
-  text-align: left;
-}
-
-.real-mode-text h2 {
-  font-size: 1.5rem;
-  margin: 0 0 15px 0;
-  font-weight: 300;
-  opacity: 0.9;
-}
-
-.real-mode-text p {
-  font-size: 1rem;
-  opacity: 0.7;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.real-mode-meteors {
-  flex: 1;
-}
-
 /* Meteor category styles */
 .meteor-category-header {
-  margin: 20px 0 10px 0;
-  text-align: left;
-  width: 100%;
+  text-align: center;
+  margin-bottom: 15px;
 }
 
 .meteor-category-header h3 {
@@ -78,20 +53,18 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
   backdrop-filter: blur(10px);
 }
 
-/* Meteor row container */
+/* Meteor row container - ahora es columna */
 .meteor-row {
   display: flex;
+  flex-direction: column;
   gap: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   width: 100%;
-  flex-wrap: wrap;
 }
 
 /* Adjust meteor option for compact layout */
 #real-meteor-selector .meteor-option {
-  flex: 1;
-  min-width: 180px;
-  max-width: 220px;
+  width: 100%;
   margin: 0;
   text-align: center;
   background: rgba(255,255,255,0.08);
@@ -132,38 +105,34 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
 
 /* Real meteor selector container adjustments */
 #real-meteor-selector {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
   width: 100%;
 }
 
+/* Cada categoría es una columna */
+.meteor-category-container {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Responsive adjustments */
-@media (max-width: 900px) {
-  .real-mode-layout {
-    flex-direction: column;
+@media (max-width: 1200px) {
+  #real-meteor-selector {
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-  }
-  
-  .real-mode-text {
-    flex: none;
-    text-align: center;
-  }
-  
-  .meteor-category-header {
-    text-align: center;
   }
 }
 
-@media (max-width: 600px) {
-  .meteor-row {
-    flex-direction: column;
-    align-items: center;
+@media (max-width: 768px) {
+  #real-meteor-selector {
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
   
-  #real-meteor-selector .meteor-option {
-    max-width: 300px;
-    width: 100%;
+  .real-mode-layout {
+    max-width: 500px;
   }
 }
 

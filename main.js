@@ -448,21 +448,25 @@ function updateRealMeteorSelector(neos) {
     }
   });
   
-  // Create rows for each category that has meteors
+  // Create columns for each category that has meteors
   Object.keys(categories).forEach(categoryKey => {
     const category = categories[categoryKey];
     if (category.meteors.length > 0) {
+      // Create category container (column)
+      const categoryContainer = document.createElement('div');
+      categoryContainer.className = 'meteor-category-container';
+      
       // Create category header
       const categoryHeader = document.createElement('div');
       categoryHeader.className = 'meteor-category-header';
       categoryHeader.innerHTML = `<h3>${category.emoji} ${category.label}</h3>`;
-      realMeteorSelector.appendChild(categoryHeader);
+      categoryContainer.appendChild(categoryHeader);
       
-      // Create row container
-      const rowContainer = document.createElement('div');
-      rowContainer.className = 'meteor-row';
+      // Create column container for meteors
+      const columnContainer = document.createElement('div');
+      columnContainer.className = 'meteor-row';
       
-      // Add meteors to this row
+      // Add meteors to this column
       category.meteors.forEach((neo, index) => {
         const closeApproach = neo.close_approach_data[0];
         const diameter = neo.estimated_diameter.meters;
@@ -515,10 +519,11 @@ function updateRealMeteorSelector(neos) {
           console.log('Selected NEO:', neo.name, 'ID:', neo.id, 'Size:', sizeCategory);
         });
         
-        rowContainer.appendChild(meteorOption);
+        columnContainer.appendChild(meteorOption);
       });
       
-      realMeteorSelector.appendChild(rowContainer);
+      categoryContainer.appendChild(columnContainer);
+      realMeteorSelector.appendChild(categoryContainer);
     }
   });
   
