@@ -124,6 +124,7 @@ def get_recent_neos():
         return {"error": "Invalid data format"}
     
     neos = data["near_earth_objects"]
+    neos = dict(sorted(neos.items()))  # Sort by date
     today = datetime.date.today().strftime("%Y-%m-%d")
     tomorrow = (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
     print(f"Today: {today}, Tomorrow: {tomorrow}")
@@ -133,6 +134,7 @@ def get_recent_neos():
             data_neos.extend(objects)
         elif date == tomorrow:
             data_neos.extend(objects)
+            break
 
     #Saving to cache
     with open("resources/recent_neos_cache.json", "w") as file:
