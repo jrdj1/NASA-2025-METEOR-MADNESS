@@ -325,21 +325,31 @@ function initialize() {
     starsCanvas.height = window.innerHeight;
   });
   
-  // Initialize Earth map with zoom disabled and satellite texture
+  // Initialize Earth map with zoom enabled and satellite texture
   var earth = new WE.map('earth_div', {
     zoom: 3,
     center: [0, 0],
-    zooming: false,
-    scrollWheelZoom: false
+    zooming: true,
+    scrollWheelZoom: true
   });
   WE.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: ''
   }).addTo(earth);
   
-  // Auto-rotate Earth slowly
+  // Auto-rotate Earth slowly, with speed decreasing as zoom increases
   function rotateEarth() {
     const currentCenter = earth.getCenter();
-    earth.setCenter([currentCenter[0], currentCenter[1] + 0.02]);
+    const currentZoom = earth.getZoom();
+    
+    // Calculate rotation speed based on zoom level
+    // At zoom 3 (default): speed = 0.01 (slower than before)
+    // At zoom 5: speed = 0.002
+    // At zoom 7+: speed = 0.0002 (extremely slow)
+    const baseSpeed = 0.01;
+    const zoomFactor = Math.pow(0.3, (currentZoom - 3) / 1.2);
+    const rotationSpeed = baseSpeed * zoomFactor;
+    
+    earth.setCenter([currentCenter[0], currentCenter[1] + rotationSpeed]);
     requestAnimationFrame(rotateEarth);
   }
   
@@ -448,21 +458,25 @@ function updateRealMeteorSelector(neos) {
     }
   });
   
-  // Create rows for each category that has meteors
+  // Create columns for each category that has meteors
   Object.keys(categories).forEach(categoryKey => {
     const category = categories[categoryKey];
     if (category.meteors.length > 0) {
+      // Create category container (column)
+      const categoryContainer = document.createElement('div');
+      categoryContainer.className = 'meteor-category-container';
+      
       // Create category header
       const categoryHeader = document.createElement('div');
       categoryHeader.className = 'meteor-category-header';
       categoryHeader.innerHTML = `<h3>${category.emoji} ${category.label}</h3>`;
-      realMeteorSelector.appendChild(categoryHeader);
+      categoryContainer.appendChild(categoryHeader);
       
-      // Create row container
-      const rowContainer = document.createElement('div');
-      rowContainer.className = 'meteor-row';
+      // Create column container for meteors
+      const columnContainer = document.createElement('div');
+      columnContainer.className = 'meteor-row';
       
-      // Add meteors to this row
+      // Add meteors to this column
       category.meteors.forEach((neo, index) => {
         const closeApproach = neo.close_approach_data[0];
         const diameter = neo.estimated_diameter.meters;
@@ -515,10 +529,11 @@ function updateRealMeteorSelector(neos) {
           console.log('Selected NEO:', neo.name, 'ID:', neo.id, 'Size:', sizeCategory);
         });
         
-        rowContainer.appendChild(meteorOption);
+        columnContainer.appendChild(meteorOption);
       });
       
-      realMeteorSelector.appendChild(rowContainer);
+      categoryContainer.appendChild(columnContainer);
+      realMeteorSelector.appendChild(categoryContainer);
     }
   });
   

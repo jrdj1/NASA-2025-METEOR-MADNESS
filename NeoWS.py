@@ -29,12 +29,15 @@ def api_request(url):
 # Fetch NEO data for browsing all objects
 def get_neows_data_browse(api_key,page=0,size=20):
     url = f"https://api.nasa.gov/neo/rest/v1/neo/browse?api_key={api_key}&page={page}&size={size}"
-    return api_request(url)
+    data = api_request(url)
+    with open("resources/neo_browse_data.json", "w") as file:
+        json.dump(data, file, indent=4)
+    return data
 
 # Fetch NEO data for the current week
 def get_neows_data_feed(api_key):
     url = f"https://api.nasa.gov/neo/rest/v1/feed?api_key={api_key}"
-    data = api_request(url)
+    data = api_request(url) 
     return data
 
 # Note: start_date and end_date should be in YYYY-MM-DD format example: 2024-1-1
@@ -76,6 +79,16 @@ def save_simplified_today_neo_data(neo_id, data):
         json.dump(data, file, indent=4)
     print(f"Simplified NEO data saved to resources/neo_{neo_id}_simplified_data.json")
 
+#Check if the NEO hits Earth
+def check_if_hit(data):
+    data = data["near_earth_objects"]
+    for object in data:
+        for cad in object["close_approach_data"]:
+            if cad["orbiting_body"] == "Earth" and float(cad["miss_distance"]["kilometers"]) < 10000:
+                print(f"Potential hit detected for NEO ID: {object['neo_reference_id']}")
+                with open(f"resources/neo_{object['neo_reference_id']}_hit_data.json", "w") as file:
+                    json.dump(object, file, indent=4)
+                print(f"Hit NEO data saved to resources/neo_{object['neo_reference_id']}_hit_data.json")
 
 # Obtains meteor data from NASA's NeoWS API
 @app.get("/neo/")
@@ -130,7 +143,7 @@ def get_recent_neos():
     data_neos = []
     for date, objects in neos.items():
         if date == today:
-            data_neos = objects
+            data_neos.extend(objects)
         elif date == tomorrow:
             data_neos.extend(objects)
 
@@ -152,7 +165,7 @@ if __name__ == "__main__":
     if not api_key:
         print("API key file not found.")
     else:
-        input_choice = input("Enter 'b' for browse, 'f' for feed, or 'l' for lookup, or 'li' for lookup by ID: ").strip().lower()
+        input_choice = input("Enter 'b' for browse, 'f' for feed, or 'l' for lookup, or 'li' for lookup by ID ").strip().lower()
         start_date = "2024-1-1"
         end_date = "2024-1-7"
         if input_choice == 'b':
