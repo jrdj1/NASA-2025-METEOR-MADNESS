@@ -37,7 +37,7 @@ def get_neows_data_browse(api_key,page=0,size=20):
 # Fetch NEO data for the current week
 def get_neows_data_feed(api_key):
     url = f"https://api.nasa.gov/neo/rest/v1/feed?api_key={api_key}"
-    data = api_request(url)
+    data = api_request(url) 
     return data
 
 # Note: start_date and end_date should be in YYYY-MM-DD format example: 2024-1-1
@@ -82,12 +82,13 @@ def save_simplified_today_neo_data(neo_id, data):
 #Check if the NEO hits Earth
 def check_if_hit(data):
     data = data["near_earth_objects"]
-    for date, objects in data:
-        for obj in objects:
-            for cad in obj["close_approach_data"]:
-                if cad["orbiting_body"].lower() == "earth" and float(cad["miss_distance"]["kilometers"]) < 10000:
-                    print(f"NEO {obj['neo_reference_id']} is on a collision course with Earth!")
-                    return True
+    for object in data:
+        for cad in object["close_approach_data"]:
+            if cad["orbiting_body"] == "Earth" and float(cad["miss_distance"]["kilometers"]) < 10000:
+                print(f"Potential hit detected for NEO ID: {object['neo_reference_id']}")
+                with open(f"resources/neo_{object['neo_reference_id']}_hit_data.json", "w") as file:
+                    json.dump(object, file, indent=4)
+                print(f"Hit NEO data saved to resources/neo_{object['neo_reference_id']}_hit_data.json")
 
 # Obtains meteor data from NASA's NeoWS API
 @app.get("/neo/")
@@ -164,7 +165,7 @@ if __name__ == "__main__":
     if not api_key:
         print("API key file not found.")
     else:
-        input_choice = input("Enter 'b' for browse, 'f' for feed, or 'l' for lookup, or 'li' for lookup by ID, 'all' for all: ").strip().lower()
+        input_choice = input("Enter 'b' for browse, 'f' for feed, or 'l' for lookup, or 'li' for lookup by ID ").strip().lower()
         start_date = "2024-1-1"
         end_date = "2024-1-7"
         if input_choice == 'b':
@@ -176,11 +177,6 @@ if __name__ == "__main__":
         elif input_choice == 'li':
             neo_id = input("Enter NEO ID: ").strip()
             data = get_neows_data_lookup_by_id(neo_id, api_key)
-        elif input_choice == 'all':
-            for neo in range(20):
-                data = get_neows_data_browse(api_key)
-                check_if_hit(data)
-            exit(0)
         else:
             print("Invalid choice.")
             data = None
