@@ -26,13 +26,178 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
 .meteor-option h3{margin: 0 0 5px 0; font-size: 1.2rem;}
 .meteor-option p{margin: 0; font-size: 0.9rem; opacity: 0.7;}
 
+/* Real mode layout */
+.real-mode-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  max-width: 1200px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.real-mode-text {
+  flex: 0 0 300px;
+  text-align: left;
+}
+
+.real-mode-text h2 {
+  font-size: 1.5rem;
+  margin: 0 0 15px 0;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.real-mode-text p {
+  font-size: 1rem;
+  opacity: 0.7;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.real-mode-meteors {
+  flex: 1;
+}
+
+/* Meteor category styles */
+.meteor-category-header {
+  margin: 20px 0 10px 0;
+  text-align: left;
+  width: 100%;
+}
+
+.meteor-category-header h3 {
+  font-size: 1.1em;
+  color: #00d4ff;
+  margin: 0;
+  padding: 8px 15px;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  display: inline-block;
+  backdrop-filter: blur(10px);
+}
+
+/* Meteor row container */
+.meteor-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Adjust meteor option for compact layout */
+#real-meteor-selector .meteor-option {
+  flex: 1;
+  min-width: 180px;
+  max-width: 220px;
+  margin: 0;
+  text-align: center;
+  background: rgba(255,255,255,0.08);
+  border: 2px solid rgba(255,255,255,0.25);
+  padding: 15px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+#real-meteor-selector .meteor-option:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #ff6b6b;
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+}
+
+#real-meteor-selector .meteor-option.active {
+  background: rgba(255,107,107,0.25);
+  border-color: #ff6b6b;
+  box-shadow: 0 3px 15px rgba(255,107,107,0.5);
+}
+
+#real-meteor-selector .meteor-option h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+#real-meteor-selector .meteor-option p {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  color: rgba(255,255,255,0.9);
+}
+
+/* Real meteor selector container adjustments */
+#real-meteor-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .real-mode-layout {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .real-mode-text {
+    flex: none;
+    text-align: center;
+  }
+  
+  .meteor-category-header {
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .meteor-row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  #real-meteor-selector .meteor-option {
+    max-width: 300px;
+    width: 100%;
+  }
+}
+
 /* Main Content Section */
 #container{display: flex; width: 100%; height: 100vh; position: relative; z-index: 1;}
 #left_panel{width: 50%; height: 100%; display: flex; align-items: center; justify-content: center;}
 #right_panel{width: 50%; height: 100%; position: relative;}
-#meteor_img{max-width: 40%; max-height: 40%; object-fit: contain;}
+#meteor_img{max-width: 40%; max-height: 40%; object-fit: contain; cursor: pointer; transition: transform 0.3s, filter 0.3s;}
+#meteor_img:hover{transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,107,107,0.6));}
 #earth_div{width: 100%; height: 100%;}
 .webgl-earth_link, .cesium-credit-textContainer{display: none !important;}
+
+/* Modal */
+.modal{display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;}
+.modal-content{background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)); border: 2px solid rgba(255,107,107,0.3); border-radius: 20px; padding: 0; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(255,107,107,0.3); animation: modalSlideIn 0.3s ease-out;}
+@keyframes modalSlideIn{from{transform: translateY(-50px); opacity: 0;} to{transform: translateY(0); opacity: 1;}}
+.close{color: #ff6b6b; float: right; font-size: 35px; font-weight: bold; cursor: pointer; padding: 10px 20px; transition: color 0.3s;}
+.close:hover{color: #fff;}
+.modal-header{background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(100,150,255,0.2)); padding: 30px; text-align: center; border-bottom: 2px solid rgba(255,107,107,0.3); border-radius: 20px 20px 0 0;}
+.modal-emoji{font-size: 4rem; margin-bottom: 10px;}
+.modal-header h2{margin: 0; font-size: 2.5rem; color: #fff; font-weight: 300;}
+.modal-body{padding: 30px;}
+.info-section{margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.05); border-left: 3px solid rgba(255,107,107,0.5); border-radius: 5px;}
+.info-section h3{margin: 0 0 10px 0; font-size: 1.2rem; color: #ff6b6b; font-weight: 400;}
+.info-section p, .info-section pre{margin: 0; line-height: 1.6; color: rgba(255,255,255,0.9); font-size: 1rem;}
+.info-section pre{white-space: pre-wrap; font-family: 'Arial', sans-serif;}
+.highlight-section{background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(100,150,255,0.1)); border-left: 3px solid rgba(100,150,255,0.7);}
+.highlight-section h3{color: #6496ff;}
+
+/* Scrollbar for modal */
+.modal-content::-webkit-scrollbar{width: 8px;}
+.modal-content::-webkit-scrollbar-track{background: rgba(0,0,0,0.3); border-radius: 10px;}
+.modal-content::-webkit-scrollbar-thumb{background: rgba(255,107,107,0.5); border-radius: 10px;}
+.modal-content::-webkit-scrollbar-thumb:hover{background: rgba(255,107,107,0.7);}
 
 /* Scroll Indicator */
 .scroll-indicator{position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; opacity: 0.7;}
