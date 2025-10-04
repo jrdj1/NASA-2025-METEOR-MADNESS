@@ -48,23 +48,16 @@
       
       <!-- Real Meteors Mode -->
       <div id="real-mode" class="mode-content">
-        <h2>Known Real Meteors</h2>
-        <div id="real-meteor-selector">
-          <div class="meteor-option" data-meteor-id="chelyabinsk">
-            <h3>🌠 Chelyabinsk</h3>
-            <p>Russia, 2013 - 20m</p>
+        <div class="real-mode-layout">
+          <div class="real-mode-text">
+            <h2>NEOs recientes detectados por la NASA</h2>
+            <p>Explora asteroides cercanos a la Tierra detectados recientemente. Selecciona uno para ver información detallada.</p>
           </div>
-          <div class="meteor-option" data-meteor-id="tunguska">
-            <h3>💫 Tunguska</h3>
-            <p>Siberia, 1908 - 60m</p>
-          </div>
-          <div class="meteor-option" data-meteor-id="chicxulub">
-            <h3>🦕 Chicxulub</h3>
-            <p>Mexico, 66M years ago - 10km</p>
-          </div>
-          <div class="meteor-option" data-meteor-id="barringer">
-            <h3>🌑 Barringer</h3>
-            <p>Arizona, 50k years ago - 50m</p>
+          <div class="real-mode-meteors">
+            <div id="real-meteor-selector">
+              <!-- Las opciones de meteoritos reales se llenarán dinámicamente con datos de la API -->
+              <div class="meteor-option loading">Cargando meteoritos reales...</div>
+            </div>
           </div>
         </div>
       </div>

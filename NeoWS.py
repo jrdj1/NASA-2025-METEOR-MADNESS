@@ -1,10 +1,31 @@
 import json
 import datetime
-from api_basics import api_request
+import requests
 import fastapi
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+import os
 
 app = fastapi.FastAPI()
 
+# Add CORS middleware to allow frontend to connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+load_dotenv()
+
+def api_request(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {"error": "Failed to retrieve data"}
+ 
 # Fetch NEO data for browsing all objects
 def get_neows_data_browse(api_key,page=0,size=20):
     url = f"https://api.nasa.gov/neo/rest/v1/neo/browse?api_key={api_key}&page={page}&size={size}"
@@ -12,31 +33,8 @@ def get_neows_data_browse(api_key,page=0,size=20):
 
 # Fetch NEO data for the current week
 def get_neows_data_feed(api_key):
-    # Check if we already have the data for this week
-    today = datetime.date.today()
-    start_of_week = today - datetime.timedelta(days=today.weekday())
-    end_of_week = start_of_week + datetime.timedelta(days=6)
-    try:
-        with open("resources/neows_feed_cache.json", "r") as file:
-            try:
-                cached_data = json.load(file)
-                cached_data = sorted(cached_data["near_earth_objects"].items())  # Sort by date
-                cached_start_date = cached_data[0][0]
-                cached_end_date = cached_data[-1][0]
-                print(f"Cached data from {cached_start_date} to {cached_end_date}")
-                if cached_start_date == start_of_week and cached_end_date == end_of_week:
-                    print("Using cached data for this week.")
-                    return cached_data["data"]
-            except (json.JSONDecodeError, KeyError):
-                pass  # If there's an error reading the cache, we'll fetch new data
-    except FileNotFoundError:
-        pass  # Cache file doesn't exist, we'll fetch new data
-
     url = f"https://api.nasa.gov/neo/rest/v1/feed?api_key={api_key}"
     data = api_request(url)
-    # Save the fetched data to cache
-    with open("resources/neows_feed_cache.json", "w") as file:
-        json.dump(data, file, indent=4)
     return data
 
 # Note: start_date and end_date should be in YYYY-MM-DD format example: 2024-1-1
@@ -79,16 +77,10 @@ def save_simplified_today_neo_data(neo_id, data):
     print(f"Simplified NEO data saved to resources/neo_{neo_id}_simplified_data.json")
 
 
-def load_api_key(file_path):
-    try:
-        with open(file_path, 'r') as file:
-            return file.read().strip()
-    except FileNotFoundError:
-        return None
-
+# Obtains meteor data from NASA's NeoWS API
 @app.get("/neo/")
 def get_neo(neo_id: str, simple: bool = False):
-    api_key = load_api_key('.env')
+    api_key = os.getenv("NASA_API_KEY")
     if not api_key:
         return {"error": "API key not found"}
     data = get_neows_data_lookup_by_id(neo_id, api_key)
@@ -96,21 +88,44 @@ def get_neo(neo_id: str, simple: bool = False):
         save_simplified_today_neo_data(neo_id, data)
     return data
 
+# Retrieves the NEO feed data for the current week and analyzes it for hazardous asteroids
 @app.get("/hazardous_asteroids")
 def get_hazardous_asteroids():
-    api_key = load_api_key('.env')
+    api_key = os.getenv("NASA_API_KEY")
     if not api_key:
         return {"error": "API key not found"}
     data = get_neows_data_feed(api_key)
     analysis = analyze_neows_data_feed(data)
     return analysis
 
+# Get 5 recent NEOs with detailed information for display
+@app.get("/recent_neos")
+def get_recent_neos():
+    api_key = os.getenv("NASA_API_KEY")
+    if not api_key:
+        return {"error": "API key not found"}
+    
+    # Get current week's NEO feed data
+    data = get_neows_data_feed(api_key)
+    
+    if "near_earth_objects" not in data:
+        return {"error": "Invalid data format"}
+    
+    neos = data["near_earth_objects"]
+    today = datetime.date.today().strftime("%Y-%m-%d")
+    data_neos = []
+    for date, objects in neos.items():
+        if date == today:
+            data_neos = objects
+            break
+    return data_neos
+
 if __name__ == "__main__":
     print("NeoWS API Interaction")
     today = datetime.date.today().strftime("%Y-%m-%d")
     print(f"Today is {today}")
 
-    api_key = load_api_key('.env')
+    api_key = os.getenv("NASA_API_KEY")
     if not api_key:
         print("API key file not found.")
     else:
