@@ -1,29 +1,664 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MMS - Meteor Madness Simulator</title>
+
+    <!-- External Libraries -->
     <script src="https://www.webglearth.com/v2/api.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css" />
     <script src="main.js"></script>
-    <title>Meteor Simulator</title>
-    <meta name="description" content="This is a basic tutorial for showing a map on a 3D globe. It could be used on web and Android & iOS mobile devices.">
+
+    <style>
+      /* Simulator Section */
+      #simulator-section {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        gap: 20px;
+        padding: 20px;
+        min-height: calc(100vh - 100px);
+      }
+
+      #control-panel {
+        width: 20%;
+        min-width: 250px;
+        background: rgba(20, 20, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        overflow-y: auto;
+        backdrop-filter: blur(10px);
+        max-height: calc(100vh - 140px);
+      }
+
+      .panel-section {
+        margin-bottom: 30px;
+      }
+
+      .panel-section h3 {
+        color: #ff6b6b;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        border-bottom: 2px solid rgba(255, 107, 107, 0.3);
+        padding-bottom: 8px;
+      }
+
+      .control-group {
+        margin-bottom: 20px;
+      }
+
+      .control-group label {
+        display: block;
+        color: #aaa;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+      }
+
+      .control-group input[type="range"] {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .control-group input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        background: #ff6b6b;
+        cursor: pointer;
+        border-radius: 50%;
+      }
+
+      .control-value {
+        color: #fff;
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-top: 5px;
+      }
+
+      .simulate-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #ff6b6b, #ff4757);
+        border: none;
+        border-radius: 10px;
+        color: #fff;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 20px;
+      }
+
+      .simulate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+      }
+
+      #results-panel {
+        margin-top: 20px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+      }
+
+      .result-item {
+        margin: 10px 0;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 5px;
+      }
+
+      .result-label {
+        color: #aaa;
+        font-size: 0.85rem;
+      }
+
+      .result-value {
+        color: #ff6b6b;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-top: 3px;
+      }
+
+      #content-container {
+        width: 80%;
+        background: rgba(20, 20, 40, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      #tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 10px;
+        flex-wrap: wrap;
+      }
+
+      .tab {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px 8px 0 0;
+        color: #aaa;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+      }
+
+      .tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+
+      .tab.active {
+        background: rgba(255, 107, 107, 0.2);
+        border-color: #ff6b6b;
+        color: #fff;
+      }
+
+      #content-area {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        min-height: 500px;
+      }
+
+      .content-panel {
+        display: none;
+        height: 100%;
+        width: 100%;
+      }
+
+      .content-panel.active {
+        display: flex;
+      }
+
+      /* 3D Globe Panel - Combined meteor + earth */
+      #globe-panel {
+        display: none;
+        flex-direction: row;
+        height: 100%;
+        width: 100%;
+      }
+
+      #globe-panel.active {
+        display: flex;
+      }
+
+      #meteor-side {
+        width: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #earth-side {
+        width: 50%;
+        position: relative;
+      }
+
+      #meteor_img {
+        max-width: 45%;
+        max-height: 45%;
+        object-fit: contain;
+        cursor: pointer;
+        transition: max-width 0.6s ease, max-height 0.6s ease, transform 0.3s,
+          filter 0.3s;
+        animation: shake 4s infinite;
+      }
+
+      #meteor_img:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.6));
+        animation: shake-hover 2.5s infinite;
+      }
+
+      #meteor_img.size-small {
+        max-width: 15%;
+        max-height: 15%;
+      }
+
+      #meteor_img.size-medium {
+        max-width: 25%;
+        max-height: 25%;
+      }
+
+      #meteor_img.size-large {
+        max-width: 35%;
+        max-height: 35%;
+      }
+
+      #meteor_img.size-catastrophic {
+        max-width: 45%;
+        max-height: 45%;
+      }
+
+      @keyframes shake {
+        0% {
+          transform: translate(0px, 0px) rotate(0deg);
+        }
+        10% {
+          transform: translate(-1px, -2px) rotate(-0.5deg);
+        }
+        20% {
+          transform: translate(-3px, 0px) rotate(0.5deg);
+        }
+        30% {
+          transform: translate(3px, 2px) rotate(0deg);
+        }
+        40% {
+          transform: translate(1px, -1px) rotate(0.5deg);
+        }
+        50% {
+          transform: translate(-1px, 2px) rotate(-0.5deg);
+        }
+        60% {
+          transform: translate(-3px, 1px) rotate(0deg);
+        }
+        70% {
+          transform: translate(3px, 1px) rotate(-0.5deg);
+        }
+        80% {
+          transform: translate(-1px, -1px) rotate(0.5deg);
+        }
+        90% {
+          transform: translate(1px, 2px) rotate(0deg);
+        }
+        100% {
+          transform: translate(0px, 0px) rotate(0deg);
+        }
+      }
+
+      @keyframes shake-hover {
+        0% {
+          transform: scale(1.1) translate(0px, 0px) rotate(0deg);
+        }
+        10% {
+          transform: scale(1.1) translate(-2px, -3px) rotate(-0.8deg);
+        }
+        20% {
+          transform: scale(1.1) translate(-4px, 1px) rotate(0.8deg);
+        }
+        30% {
+          transform: scale(1.1) translate(4px, 3px) rotate(-0.3deg);
+        }
+        40% {
+          transform: scale(1.1) translate(2px, -2px) rotate(0.8deg);
+        }
+        50% {
+          transform: scale(1.1) translate(-2px, 3px) rotate(-0.8deg);
+        }
+        60% {
+          transform: scale(1.1) translate(-4px, 2px) rotate(0.3deg);
+        }
+        70% {
+          transform: scale(1.1) translate(4px, 2px) rotate(-0.8deg);
+        }
+        80% {
+          transform: scale(1.1) translate(-2px, -2px) rotate(0.8deg);
+        }
+        90% {
+          transform: scale(1.1) translate(2px, 3px) rotate(-0.3deg);
+        }
+        100% {
+          transform: scale(1.1) translate(0px, 0px) rotate(0deg);
+        }
+      }
+
+      #earth_div {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+      }
+
+      /* Other panels */
+      #map-container {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px;
+        position: relative;
+      }
+
+      #impact-map {
+        height: 100%;
+        width: 100%;
+      }
+
+      .map-instruction {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 10px 20px;
+        border-radius: 8px;
+        color: #fff;
+        font-size: 0.9rem;
+        z-index: 1000;
+        pointer-events: none;
+      }
+
+      #statistics-panel {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .stat-card h4 {
+        color: #ff6b6b;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+      }
+
+      .stat-card .big-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #fff;
+      }
+
+      .stat-card .unit {
+        color: #aaa;
+        font-size: 0.9rem;
+      }
+
+      #analysis-panel {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .analysis-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border-left: 4px solid #ff6b6b;
+      }
+
+      .analysis-section h4 {
+        color: #ff6b6b;
+        margin-bottom: 15px;
+      }
+
+      .analysis-section p {
+        color: #ccc;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      .effect-list {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      .effect-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #aaa;
+      }
+
+      .effect-list li:before {
+        content: "▸ ";
+        color: #ff6b6b;
+        font-weight: bold;
+        margin-right: 8px;
+      }
+
+      #prevention-panel {
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .mitigation-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .mitigation-card h4 {
+        color: #ff6b6b;
+        margin-bottom: 10px;
+      }
+
+      .mitigation-card p {
+        color: #ccc;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+
+      /* Chatbot Widget */
+      #chatbot-widget {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+      }
+
+      #chatbot-toggle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        transition: all 0.3s;
+      }
+
+      #chatbot-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+      }
+
+      #chatbot-window {
+        display: none;
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        width: 350px;
+        height: 500px;
+        background: rgba(20, 20, 40, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      #chatbot-window.open {
+        display: flex;
+      }
+
+      #chatbot-header {
+        padding: 20px;
+        background: rgba(102, 126, 234, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      #chatbot-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      #chatbot-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+      }
+
+      #chatbot-close:hover {
+        opacity: 1;
+      }
+
+      #chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .chat-message {
+        margin-bottom: 15px;
+        padding: 12px 15px;
+        border-radius: 12px;
+        max-width: 80%;
+        animation: slideIn 0.3s;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .chat-message.bot {
+        background: rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        margin-right: auto;
+      }
+
+      .chat-message.user {
+        background: rgba(255, 107, 107, 0.2);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        margin-left: auto;
+      }
+
+      .chat-message p {
+        margin: 0;
+        line-height: 1.5;
+        font-size: 0.9rem;
+      }
+
+      #chat-input-container {
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        gap: 10px;
+      }
+
+      #chat-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 10px 15px;
+        color: #fff;
+        font-size: 0.9rem;
+        outline: none;
+      }
+
+      #chat-input:focus {
+        border-color: rgba(102, 126, 234, 0.5);
+      }
+
+      #chat-send {
+        background: rgba(102, 126, 234, 0.3);
+        border: 1px solid rgba(102, 126, 234, 0.5);
+        border-radius: 20px;
+        padding: 10px 20px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+      }
+
+      #chat-send:hover {
+        background: rgba(102, 126, 234, 0.5);
+      }
+
+      @media (max-width: 1024px) {
+        #simulator-section {
+          flex-direction: column;
+        }
+
+        #control-panel {
+          width: 100%;
+          max-height: none;
+        }
+
+        #content-container {
+          width: 100%;
+          height: 600px;
+        }
+
+        #globe-panel {
+          flex-direction: column;
+        }
+
+        #meteor-side,
+        #earth-side {
+          width: 100%;
+          height: 50%;
+        }
+      }
+    </style>
   </head>
   <body onload="initialize()">
     <canvas id="stars_canvas"></canvas>
-    
+
     <!-- Hero Section -->
     <section id="hero">
       <h1><span class="highlight">MMS</span> Meteor Madness Simulator</h1>
-      <p>Simulate meteor impacts on Earth</p>
-      
-      <!-- Mode Selector -->
+      <p>Simulate asteroid impacts on Earth with real NASA data</p>
+
       <div id="mode-selector">
-        <button class="mode-btn active" data-mode="simulate">Simulate Impact</button>
+        <button class="mode-btn active" data-mode="simulate">
+          Simulate Impact
+        </button>
         <button class="mode-btn" data-mode="real">Real Meteors</button>
       </div>
-      
-      <!-- Simulation Mode -->
+
       <div id="simulation-mode" class="mode-content active">
         <h2>Choose Meteor Size</h2>
         <div id="meteor-selector">
@@ -45,137 +680,617 @@
           </div>
         </div>
       </div>
-      
-      <!-- Real Meteors Mode -->
+
       <div id="real-mode" class="mode-content">
         <div class="real-mode-layout">
           <div class="real-mode-text">
-            <h2>NEOs recientes detectados por la NASA</h2>
-            <p>Explora asteroides cercanos a la Tierra detectados recientemente. Selecciona uno para ver información detallada.</p>
+            <h2>Recent NEOs Detected by NASA</h2>
+            <p>Explore near-Earth asteroids detected recently.</p>
           </div>
-          <div class="real-mode-meteors">
-            <div id="real-meteor-selector">
-              <!-- Las opciones de meteoritos reales se llenarán dinámicamente con datos de la API -->
-              <div class="meteor-option loading">Cargando meteoritos reales...</div>
+          <div id="real-meteor-selector">
+            <div class="meteor-option loading">Loading real meteors...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="scroll-indicator"></div>
+    </section>
+
+    <!-- Simulator Section with Tabs -->
+    <section id="simulator-section">
+      <div id="control-panel">
+        <div class="panel-section">
+          <h3>Impact Parameters</h3>
+
+          <div class="control-group">
+            <label>Asteroid Diameter</label>
+            <input
+              type="range"
+              id="diameter"
+              min="10"
+              max="10000"
+              value="100"
+              step="10"
+            />
+            <div class="control-value">
+              <span id="diameter-value">100</span> meters
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Impact Velocity</label>
+            <input
+              type="range"
+              id="velocity"
+              min="10"
+              max="70"
+              value="20"
+              step="1"
+            />
+            <div class="control-value">
+              <span id="velocity-value">20</span> km/s
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label>Entry Angle</label>
+            <input
+              type="range"
+              id="angle"
+              min="0"
+              max="90"
+              value="45"
+              step="5"
+            />
+            <div class="control-value"><span id="angle-value">45</span>°</div>
+          </div>
+
+          <div class="control-group">
+            <label>Impact Location</label>
+            <div class="control-value" id="location-display">Click on map</div>
+          </div>
+        </div>
+
+        <button class="simulate-btn" onclick="calculateImpact()">
+          SIMULATE IMPACT
+        </button>
+
+        <div id="results-panel" style="display: none">
+          <h3 style="color: #ff6b6b; margin-bottom: 15px">Impact Results</h3>
+
+          <div class="result-item">
+            <div class="result-label">Energy Released</div>
+            <div class="result-value" id="result-energy">-</div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">Destruction Radius</div>
+            <div class="result-value" id="result-radius">-</div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">Crater Diameter</div>
+            <div class="result-value" id="result-crater">-</div>
+          </div>
+
+          <div class="result-item">
+            <div class="result-label">Hiroshima Equivalent</div>
+            <div class="result-value" id="result-equivalent">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="content-container">
+        <div id="tabs">
+          <div class="tab active" onclick="switchTab('globe')">🌍 3D View</div>
+          <div class="tab" onclick="switchTab('map')">🗺️ 2D Impact Map</div>
+          <div class="tab" onclick="switchTab('statistics')">📊 Statistics</div>
+          <div class="tab" onclick="switchTab('analysis')">🔬 Analysis</div>
+          <div class="tab" onclick="switchTab('prevention')">🛡️ Prevention</div>
+        </div>
+
+        <div id="content-area">
+          <!-- 3D Globe Panel with Meteor -->
+          <div id="globe-panel" class="content-panel active">
+            <div id="meteor-side">
+              <img
+                src="images/metheor.png"
+                alt="Meteorite"
+                id="meteor_img"
+                title="Click to see info"
+              />
+            </div>
+            <div id="earth-side">
+              <div id="earth_div"></div>
+            </div>
+          </div>
+
+          <!-- 2D Map Panel -->
+          <div id="map-panel" class="content-panel">
+            <div id="map-container">
+              <div class="map-instruction">Click to select impact location</div>
+              <div id="impact-map"></div>
+            </div>
+          </div>
+
+          <!-- Statistics Panel -->
+          <div id="statistics-panel" class="content-panel">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <h4>TOTAL ENERGY</h4>
+                <div class="big-number" id="stat-energy">0</div>
+                <div class="unit">Megatons TNT</div>
+              </div>
+
+              <div class="stat-card">
+                <h4>DESTRUCTION ZONE</h4>
+                <div class="big-number" id="stat-radius">0</div>
+                <div class="unit">km radius</div>
+              </div>
+
+              <div class="stat-card">
+                <h4>HIROSHIMA BOMBS</h4>
+                <div class="big-number" id="stat-hiroshima">0</div>
+                <div class="unit">equivalent</div>
+              </div>
+
+              <div class="stat-card">
+                <h4>EARTHQUAKE</h4>
+                <div class="big-number" id="stat-earthquake">0</div>
+                <div class="unit">Richter scale</div>
+              </div>
+            </div>
+
+            <div
+              style="
+                background: rgba(255, 255, 255, 0.05);
+                padding: 20px;
+                border-radius: 10px;
+              "
+            >
+              <canvas id="comparison-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Analysis Panel -->
+          <div id="analysis-panel" class="content-panel">
+            <div class="analysis-section">
+              <h4>Immediate Effects (Day 0)</h4>
+              <p>The impact creates immediate catastrophic effects:</p>
+              <ul class="effect-list">
+                <li>Fireball formation exceeding 5,000°C</li>
+                <li>Supersonic shockwave propagation</li>
+                <li>Ground zero vaporization</li>
+                <li>Seismic waves triggering earthquakes</li>
+                <li>Thermal radiation igniting fires</li>
+              </ul>
+            </div>
+
+            <div class="analysis-section">
+              <h4>Secondary Effects (Hours to Days)</h4>
+              <p>Following the initial impact:</p>
+              <ul class="effect-list">
+                <li>Global atmospheric shockwave</li>
+                <li>Ejected material raining down</li>
+                <li>Regional firestorms</li>
+                <li>Infrastructure collapse</li>
+                <li>Communication disruption</li>
+              </ul>
+            </div>
+
+            <div class="analysis-section">
+              <h4>Long-term Consequences (Weeks to Months)</h4>
+              <p>Lasting environmental effects:</p>
+              <ul class="effect-list">
+                <li>Atmospheric dust blocking sunlight</li>
+                <li>Temperature drop affecting agriculture</li>
+                <li>Potential impact winter</li>
+                <li>Ecosystem disruption</li>
+                <li>Global economic impact</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Prevention Panel -->
+          <div id="prevention-panel" class="content-panel">
+            <div class="mitigation-card">
+              <h4>⚡ Kinetic Impactor</h4>
+              <p>
+                Spacecraft impacts asteroid at high velocity to alter
+                trajectory.
+              </p>
+              <p>
+                <strong>Lead Time:</strong> 5-10 years |
+                <strong>Success:</strong> 85% (DART proven)
+              </p>
+            </div>
+
+            <div class="mitigation-card">
+              <h4>🛸 Gravity Tractor</h4>
+              <p>
+                Spacecraft uses gravitational pull to slowly change asteroid
+                path.
+              </p>
+              <p>
+                <strong>Lead Time:</strong> 10-20 years |
+                <strong>Success:</strong> 70% (theoretical)
+              </p>
+            </div>
+
+            <div class="mitigation-card">
+              <h4>☢️ Nuclear Deflection</h4>
+              <p>Nuclear device vaporizes surface material, creating thrust.</p>
+              <p>
+                <strong>Lead Time:</strong> 1-5 years |
+                <strong>Success:</strong> 90% (simulated)
+              </p>
+            </div>
+
+            <div class="mitigation-card">
+              <h4>🔭 Early Warning Systems</h4>
+              <p>
+                NASA's NEOWISE and Pan-STARRS continuously scan for threats.
+              </p>
+              <p><strong>Coverage:</strong> ~90% of 1km+ asteroids tracked</p>
             </div>
           </div>
         </div>
       </div>
-      
-      <div class="scroll-indicator"></div>
     </section>
-    
-    <!-- Main Content Section -->
-    <div id="container">
-      <div id="left_panel">
-        <img src="images/metheor.png" alt="Meteorito" id="meteor_img" title="Haz clic para ver información">
-      </div>
-      <div id="right_panel">
-        <div id="earth_div"></div>
+
+    <!-- Chatbot Widget -->
+    <div id="chatbot-widget">
+      <button id="chatbot-toggle" onclick="toggleChatbot()">🤖</button>
+      <div id="chatbot-window">
+        <div id="chatbot-header">
+          <h3>🤖 Meteor Assistant</h3>
+          <button id="chatbot-close" onclick="toggleChatbot()">×</button>
+        </div>
+        <div id="chat-messages">
+          <div class="chat-message bot">
+            <p>👋 Hello! Ask me about asteroids!</p>
+          </div>
+          <div class="chat-message bot">
+            <p>
+              💡 Try: "What if 1km hit NYC?" or "How do we detect asteroids?"
+            </p>
+          </div>
+        </div>
+        <div id="chat-input-container">
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Ask me anything..."
+            disabled
+          />
+          <button id="chat-send" disabled>Send</button>
+        </div>
       </div>
     </div>
-    
-    <!-- Modal de información del meteorito -->
+
+    <!-- Modal -->
     <div id="meteor-modal" class="modal">
       <div class="modal-content">
         <span class="close" id="modal-close">&times;</span>
         <div class="modal-header">
           <div class="modal-emoji" id="modal-emoji">🌠</div>
-          <h2 id="modal-name">Meteorito</h2>
+          <h2 id="modal-name">Meteorite</h2>
         </div>
         <div class="modal-body">
           <div class="info-section">
-            <h3>📅 Fecha del Impacto</h3>
+            <h3>📅 Impact Date</h3>
             <p id="modal-date"></p>
           </div>
           <div class="info-section">
-            <h3>📍 Ubicación</h3>
+            <h3>📍 Location</h3>
             <p id="modal-location"></p>
           </div>
           <div class="info-section">
-            <h3>📏 Tamaño</h3>
+            <h3>📏 Size</h3>
             <p id="modal-size"></p>
           </div>
           <div class="info-section">
-            <h3>⚖️ Masa</h3>
+            <h3>⚖️ Mass</h3>
             <p id="modal-mass"></p>
           </div>
           <div class="info-section">
-            <h3>⚡ Velocidad</h3>
+            <h3>⚡ Velocity</h3>
             <p id="modal-speed"></p>
           </div>
           <div class="info-section">
-            <h3>💥 Energía del Impacto</h3>
+            <h3>💥 Impact Energy</h3>
             <p id="modal-energy"></p>
           </div>
           <div class="info-section">
-            <h3>🌍 Impacto</h3>
+            <h3>🌍 Impact</h3>
             <p id="modal-impact"></p>
           </div>
           <div class="info-section">
-            <h3>🕳️ Cráter</h3>
+            <h3>🕳️ Crater</h3>
             <p id="modal-crater"></p>
           </div>
           <div class="info-section highlight-section">
-            <h3>✨ Datos Interesantes</h3>
+            <h3>✨ Interesting Facts</h3>
             <pre id="modal-facts"></pre>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Chatbot Section -->
-    <section id="chatbot-section">
-      <div class="chatbot-container">
-        <h2>🤖 Ask About Meteors</h2>
-        <p class="chatbot-description">Get information about meteor impacts, statistics, and scientific data</p>
-        
-        <div id="chat-window">
-          <div class="chat-message bot">
-            <p>👋 Hello! I'm your meteor expert assistant. Ask me anything about meteors, impacts, or our simulation!</p>
-          </div>
-        </div>
-        
-        <div class="chat-input-container">
-          <input type="text" id="chat-input" placeholder="Type your question here..." disabled>
-          <button id="chat-send" disabled>Send</button>
-        </div>
-        <p class="coming-soon">Coming soon...</p>
-      </div>
-      
-      <!-- Team & Copyright -->
-      <div class="footer">
-        <div class="team-section">
-          <h3>Team Members</h3>
-          <div class="team-members">
-            <div class="member">
-              <div class="member-avatar">👨‍💻</div>
-              <p class="member-name">John Doe</p>
-              <p class="member-role">Lead Developer</p>
-            </div>
-            <div class="member">
-              <div class="member-avatar">👩‍🔬</div>
-              <p class="member-name">Jane Smith</p>
-              <p class="member-role">Data Scientist</p>
-            </div>
-            <div class="member">
-              <div class="member-avatar">👨‍🎨</div>
-              <p class="member-name">Mike Johnson</p>
-              <p class="member-role">UI/UX Designer</p>
-            </div>
-            <div class="member">
-              <div class="member-avatar">👩‍💼</div>
-              <p class="member-name">Sarah Williams</p>
-              <p class="member-role">Project Manager</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="copyright">
-          <p>© 2025 MMS - Meteor Madness Simulator. All rights reserved.</p>
-          <p>Data provided by NASA APIs | Built for NASA Space Apps Challenge</p>
-        </div>
-      </div>
-    </section>
+
+    <div id="footer">
+      <p>© 2025 MMS - Meteor Madness Simulator. All rights reserved.</p>
+      <p>
+        Data provided by NASA NeoWs API | Built for NASA Space Apps Challenge
+        2025
+      </p>
+    </div>
+
+    <script>
+      let impactMap;
+      let impactMarker;
+      let destructionCircles = [];
+      let impactLocation = { lat: 40.4168, lng: -3.7038 };
+      let comparisonChart;
+
+      window.addEventListener("load", function () {
+        setTimeout(initializeNewFeatures, 1000);
+      });
+
+      function initializeNewFeatures() {
+        console.log("Initializing features...");
+        initializeSimulatorControls();
+        initializeLeafletMap();
+        initializeStatisticsChart();
+      }
+
+      function initializeSimulatorControls() {
+        const diameter = document.getElementById("diameter");
+        const velocity = document.getElementById("velocity");
+        const angle = document.getElementById("angle");
+
+        if (diameter) {
+          diameter.addEventListener("input", (e) => {
+            document.getElementById("diameter-value").textContent =
+              e.target.value;
+          });
+        }
+
+        if (velocity) {
+          velocity.addEventListener("input", (e) => {
+            document.getElementById("velocity-value").textContent =
+              e.target.value;
+          });
+        }
+
+        if (angle) {
+          angle.addEventListener("input", (e) => {
+            document.getElementById("angle-value").textContent = e.target.value;
+          });
+        }
+      }
+
+      function initializeLeafletMap() {
+        if (typeof L === "undefined") {
+          console.warn("Leaflet not loaded");
+          return;
+        }
+
+        try {
+          impactMap = L.map("impact-map").setView(
+            [impactLocation.lat, impactLocation.lng],
+            4
+          );
+
+          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "© OpenStreetMap",
+            maxZoom: 18,
+          }).addTo(impactMap);
+
+          impactMap.on("click", function (e) {
+            impactLocation = { lat: e.latlng.lat, lng: e.latlng.lng };
+
+            if (impactMarker) {
+              impactMap.removeLayer(impactMarker);
+            }
+
+            impactMarker = L.marker([e.latlng.lat, e.latlng.lng], {
+              icon: L.divIcon({
+                className: "impact-marker",
+                html: "💥",
+                iconSize: [30, 30],
+              }),
+            }).addTo(impactMap);
+
+            document.getElementById(
+              "location-display"
+            ).textContent = `${e.latlng.lat.toFixed(
+              2
+            )}°, ${e.latlng.lng.toFixed(2)}°`;
+          });
+
+          console.log("Leaflet initialized");
+        } catch (e) {
+          console.error("Error initializing Leaflet:", e);
+        }
+      }
+
+      function initializeStatisticsChart() {
+        if (typeof Chart === "undefined") {
+          console.warn("Chart.js not loaded");
+          return;
+        }
+
+        const ctx = document.getElementById("comparison-chart");
+        if (!ctx) return;
+
+        try {
+          comparisonChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: [
+                "Your Impact",
+                "Chelyabinsk",
+                "Tunguska",
+                "Barringer",
+                "Chicxulub",
+              ],
+              datasets: [
+                {
+                  label: "Energy (Megatons)",
+                  data: [0, 0.5, 15, 10000, 100000000],
+                  backgroundColor: [
+                    "rgba(255, 107, 107, 0.8)",
+                    "rgba(52, 152, 219, 0.8)",
+                    "rgba(46, 204, 113, 0.8)",
+                    "rgba(155, 89, 182, 0.8)",
+                    "rgba(241, 196, 15, 0.8)",
+                  ],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              scales: {
+                y: {
+                  type: "logarithmic",
+                  title: { display: true, text: "Energy (MT)", color: "#fff" },
+                  ticks: { color: "#aaa" },
+                  grid: { color: "rgba(255, 255, 255, 0.1)" },
+                },
+                x: {
+                  ticks: { color: "#aaa" },
+                  grid: { color: "rgba(255, 255, 255, 0.1)" },
+                },
+              },
+              plugins: {
+                legend: { labels: { color: "#fff" } },
+              },
+            },
+          });
+
+          console.log("Chart initialized");
+        } catch (e) {
+          console.error("Error initializing chart:", e);
+        }
+      }
+
+      function calculateImpact() {
+        const diameter = parseFloat(document.getElementById("diameter").value);
+        const velocity = parseFloat(document.getElementById("velocity").value);
+        const angle = parseFloat(document.getElementById("angle").value);
+
+        const density = 3000;
+        const radius = diameter / 2;
+        const volume = (4 / 3) * Math.PI * Math.pow(radius, 3);
+        const mass = volume * density;
+        const velocityMs = velocity * 1000;
+        const energyJoules = 0.5 * mass * Math.pow(velocityMs, 2);
+        const energyMegatons = energyJoules / 4.184e15;
+        const destructionRadius = 2.2 * Math.pow(energyMegatons, 0.33);
+        const angleRad = (angle * Math.PI) / 180;
+        const craterDiameter =
+          1.8 * Math.pow(diameter, 0.78) * Math.pow(Math.sin(angleRad), 0.33);
+        const hiroshimaEquivalent = energyMegatons / 0.015;
+        const earthquakeMagnitude = 4 + 0.67 * Math.log10(energyMegatons);
+
+        document.getElementById("results-panel").style.display = "block";
+        document.getElementById(
+          "result-energy"
+        ).textContent = `${energyMegatons.toFixed(2)} MT`;
+        document.getElementById(
+          "result-radius"
+        ).textContent = `${destructionRadius.toFixed(2)} km`;
+        document.getElementById("result-crater").textContent = `${(
+          craterDiameter / 1000
+        ).toFixed(2)} km`;
+        document.getElementById(
+          "result-equivalent"
+        ).textContent = `${hiroshimaEquivalent.toFixed(0)} bombs`;
+
+        document.getElementById("stat-energy").textContent =
+          energyMegatons.toFixed(2);
+        document.getElementById("stat-radius").textContent =
+          destructionRadius.toFixed(2);
+        document.getElementById("stat-hiroshima").textContent =
+          hiroshimaEquivalent.toFixed(0);
+        document.getElementById("stat-earthquake").textContent =
+          earthquakeMagnitude.toFixed(1);
+
+        if (comparisonChart) {
+          comparisonChart.data.datasets[0].data[0] = energyMegatons;
+          comparisonChart.update();
+        }
+
+        drawDestructionCircles(destructionRadius);
+      }
+
+      function drawDestructionCircles(radius) {
+        if (!impactMap) return;
+
+        destructionCircles.forEach((circle) => impactMap.removeLayer(circle));
+        destructionCircles = [];
+
+        const zones = [
+          { radius: radius, color: "#ff0000", label: "Total Destruction" },
+          { radius: radius * 2, color: "#ff6b00", label: "Severe Damage" },
+          { radius: radius * 3, color: "#ffd700", label: "Moderate Damage" },
+          { radius: radius * 5, color: "#4169e1", label: "Shockwave" },
+        ];
+
+        zones.forEach((zone) => {
+          const circle = L.circle([impactLocation.lat, impactLocation.lng], {
+            radius: zone.radius * 1000,
+            color: zone.color,
+            fillColor: zone.color,
+            fillOpacity: 0.2,
+            weight: 2,
+          }).addTo(impactMap);
+
+          circle.bindPopup(
+            `<b>${zone.label}</b><br>Radius: ${zone.radius.toFixed(2)} km`
+          );
+          destructionCircles.push(circle);
+        });
+
+        const bounds = L.latLngBounds(
+          destructionCircles.map((c) => c.getBounds())
+        );
+        impactMap.fitBounds(bounds);
+      }
+
+      function switchTab(tabName) {
+        const tabs = document.querySelectorAll(".tab");
+        tabs.forEach((tab) => tab.classList.remove("active"));
+        event.target.classList.add("active");
+
+        const panels = document.querySelectorAll(".content-panel");
+        panels.forEach((panel) => panel.classList.remove("active"));
+
+        switch (tabName) {
+          case "globe":
+            document.getElementById("globe-panel").classList.add("active");
+            break;
+          case "map":
+            document.getElementById("map-panel").classList.add("active");
+            setTimeout(() => impactMap && impactMap.invalidateSize(), 100);
+            break;
+          case "statistics":
+            document.getElementById("statistics-panel").classList.add("active");
+            break;
+          case "analysis":
+            document.getElementById("analysis-panel").classList.add("active");
+            break;
+          case "prevention":
+            document.getElementById("prevention-panel").classList.add("active");
+            break;
+        }
+      }
+
+      function toggleChatbot() {
+        const chatWindow = document.getElementById("chatbot-window");
+        chatWindow.classList.toggle("open");
+      }
+    </script>
   </body>
 </html>
