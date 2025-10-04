@@ -12,8 +12,32 @@ def get_neows_data_browse(api_key,page=0,size=20):
 
 # Fetch NEO data for the current week
 def get_neows_data_feed(api_key):
+    # Check if we already have the data for this week
+    today = datetime.date.today()
+    start_of_week = today - datetime.timedelta(days=today.weekday())
+    end_of_week = start_of_week + datetime.timedelta(days=6)
+    try:
+        with open("resources/neows_feed_cache.json", "r") as file:
+            try:
+                cached_data = json.load(file)
+                cached_data = sorted(cached_data["near_earth_objects"].items())  # Sort by date
+                cached_start_date = cached_data[0][0]
+                cached_end_date = cached_data[-1][0]
+                print(f"Cached data from {cached_start_date} to {cached_end_date}")
+                if cached_start_date == start_of_week and cached_end_date == end_of_week:
+                    print("Using cached data for this week.")
+                    return cached_data["data"]
+            except (json.JSONDecodeError, KeyError):
+                pass  # If there's an error reading the cache, we'll fetch new data
+    except FileNotFoundError:
+        pass  # Cache file doesn't exist, we'll fetch new data
+
     url = f"https://api.nasa.gov/neo/rest/v1/feed?api_key={api_key}"
-    return api_request(url)
+    data = api_request(url)
+    # Save the fetched data to cache
+    with open("resources/neows_feed_cache.json", "w") as file:
+        json.dump(data, file, indent=4)
+    return data
 
 # Note: start_date and end_date should be in YYYY-MM-DD format example: 2024-1-1
 def get_neows_data_lookup(start_date, end_date, api_key):
@@ -50,9 +74,9 @@ def save_simplified_today_neo_data(neo_id, data):
 
     data["close_approach_data"] = close_approach_today
             
-    with open(f"resources/neo_{neo_id}_simplified_data.txt", "w") as file:
+    with open(f"resources/neo_{neo_id}_simplified_data.json", "w") as file:
         json.dump(data, file, indent=4)
-    print(f"Simplified NEO data saved to resources/neo_{neo_id}_simplified_data.txt")
+    print(f"Simplified NEO data saved to resources/neo_{neo_id}_simplified_data.json")
 
 
 def load_api_key(file_path):
@@ -115,8 +139,8 @@ if __name__ == "__main__":
             if input_choice_2 == 'h':
                 analysis = analyze_neows_data_feed(data)
                 print(analysis)
-                with open(f"resources/hazardous_asteroid_analysis.txt", "w") as file:
+                with open(f"resources/hazardous_asteroid_analysis.json", "w") as file:
                     json.dump(analysis, file, indent=4)
-                print(f"Analysis saved to resources/hazardous_asteroid_analysis.txt")
+                print(f"Analysis saved to resources/hazardous_asteroid_analysis.json")
         else:
             save_simplified_today_neo_data(neo_id, data)
