@@ -48,23 +48,16 @@
       
       <!-- Real Meteors Mode -->
       <div id="real-mode" class="mode-content">
-        <h2>Known Real Meteors</h2>
-        <div id="real-meteor-selector">
-          <div class="meteor-option" data-meteor-id="chelyabinsk">
-            <h3>🌠 Chelyabinsk</h3>
-            <p>Russia, 2013 - 20m</p>
+        <div class="real-mode-layout">
+          <div class="real-mode-text">
+            <h2>NEOs recientes detectados por la NASA</h2>
+            <p>Explora asteroides cercanos a la Tierra detectados recientemente. Selecciona uno para ver información detallada.</p>
           </div>
-          <div class="meteor-option" data-meteor-id="tunguska">
-            <h3>💫 Tunguska</h3>
-            <p>Siberia, 1908 - 60m</p>
-          </div>
-          <div class="meteor-option" data-meteor-id="chicxulub">
-            <h3>🦕 Chicxulub</h3>
-            <p>Mexico, 66M years ago - 10km</p>
-          </div>
-          <div class="meteor-option" data-meteor-id="barringer">
-            <h3>🌑 Barringer</h3>
-            <p>Arizona, 50k years ago - 50m</p>
+          <div class="real-mode-meteors">
+            <div id="real-meteor-selector">
+              <!-- Las opciones de meteoritos reales se llenarán dinámicamente con datos de la API -->
+              <div class="meteor-option loading">Cargando meteoritos reales...</div>
+            </div>
           </div>
         </div>
       </div>
@@ -75,10 +68,59 @@
     <!-- Main Content Section -->
     <div id="container">
       <div id="left_panel">
-        <img src="images/metheor.png" alt="Meteorito" id="meteor_img">
+        <img src="images/metheor.png" alt="Meteorito" id="meteor_img" title="Haz clic para ver información">
       </div>
       <div id="right_panel">
         <div id="earth_div"></div>
+      </div>
+    </div>
+    
+    <!-- Modal de información del meteorito -->
+    <div id="meteor-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="modal-close">&times;</span>
+        <div class="modal-header">
+          <div class="modal-emoji" id="modal-emoji">🌠</div>
+          <h2 id="modal-name">Meteorito</h2>
+        </div>
+        <div class="modal-body">
+          <div class="info-section">
+            <h3>📅 Fecha del Impacto</h3>
+            <p id="modal-date"></p>
+          </div>
+          <div class="info-section">
+            <h3>📍 Ubicación</h3>
+            <p id="modal-location"></p>
+          </div>
+          <div class="info-section">
+            <h3>📏 Tamaño</h3>
+            <p id="modal-size"></p>
+          </div>
+          <div class="info-section">
+            <h3>⚖️ Masa</h3>
+            <p id="modal-mass"></p>
+          </div>
+          <div class="info-section">
+            <h3>⚡ Velocidad</h3>
+            <p id="modal-speed"></p>
+          </div>
+          <div class="info-section">
+            <h3>💥 Energía del Impacto</h3>
+            <p id="modal-energy"></p>
+          </div>
+          <div class="info-section">
+            <h3>🌍 Impacto</h3>
+            <p id="modal-impact"></p>
+          </div>
+          <div class="info-section">
+            <h3>🕳️ Cráter</h3>
+            <p id="modal-crater"></p>
+          </div>
+          <div class="info-section highlight-section">
+            <h3>✨ Datos Interesantes</h3>
+            <pre id="modal-facts"></pre>
+          </div>
+        </div>
       </div>
     </div>
     
