@@ -19,22 +19,22 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🔁 Flujo general del pipeline
 
-1. Ingesta y almacenamiento en caché.  
-2. Normalización y validación de datos.  
-3. Estimación de propiedades físicas.  
-4. Propagación orbital.  
-5. Detección de aproximaciones o intersecciones.  
-6. Estimación de Δv y ventanas de oportunidad.  
-7. Análisis de incertidumbre (Monte Carlo ligero).  
+1. Ingesta y almacenamiento en caché.
+2. Normalización y validación de datos.
+3. Estimación de propiedades físicas.
+4. Propagación orbital.
+5. Detección de aproximaciones o intersecciones.
+6. Estimación de Δv y ventanas de oportunidad.
+7. Análisis de incertidumbre (Monte Carlo ligero).
 8. Generación de salida para la Fase 2.
 
 ---
 
 ## ⚙️ 1) Ingesta y Caching
 
-- Obtiene datos de la NASA NEO API.  
-- Aplica límites de tasa, reintentos y guarda copias locales (caché).  
-- Incluye metadatos de origen (timestamp, versión de API).  
+- Obtiene datos de la NASA NEO API.
+- Aplica límites de tasa, reintentos y guarda copias locales (caché).
+- Incluye metadatos de origen (timestamp, versión de API).
 
 **Output parcial:** `RawNeoRecord[]`
 
