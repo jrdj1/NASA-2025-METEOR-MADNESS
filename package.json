@@ -1,0 +1,13 @@
+{
+  "name": "nasa",
+  "version": "1.0.0",
+  "description": "Proyecto WebGL simple con un triángulo rotatorio",
+  "main": "main.js",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["webgl", "3d", "graphics"],
+  "author": "",
+  "license": "ISC"
+}
