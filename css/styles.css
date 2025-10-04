@@ -30,9 +30,33 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
 #container{display: flex; width: 100%; height: 100vh; position: relative; z-index: 1;}
 #left_panel{width: 50%; height: 100%; display: flex; align-items: center; justify-content: center;}
 #right_panel{width: 50%; height: 100%; position: relative;}
-#meteor_img{max-width: 40%; max-height: 40%; object-fit: contain;}
+#meteor_img{max-width: 40%; max-height: 40%; object-fit: contain; cursor: pointer; transition: transform 0.3s, filter 0.3s;}
+#meteor_img:hover{transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,107,107,0.6));}
 #earth_div{width: 100%; height: 100%;}
 .webgl-earth_link, .cesium-credit-textContainer{display: none !important;}
+
+/* Modal */
+.modal{display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(10px); align-items: center; justify-content: center;}
+.modal-content{background: linear-gradient(135deg, rgba(20,20,40,0.95), rgba(40,20,60,0.95)); border: 2px solid rgba(255,107,107,0.3); border-radius: 20px; padding: 0; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 50px rgba(255,107,107,0.3); animation: modalSlideIn 0.3s ease-out;}
+@keyframes modalSlideIn{from{transform: translateY(-50px); opacity: 0;} to{transform: translateY(0); opacity: 1;}}
+.close{color: #ff6b6b; float: right; font-size: 35px; font-weight: bold; cursor: pointer; padding: 10px 20px; transition: color 0.3s;}
+.close:hover{color: #fff;}
+.modal-header{background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(100,150,255,0.2)); padding: 30px; text-align: center; border-bottom: 2px solid rgba(255,107,107,0.3); border-radius: 20px 20px 0 0;}
+.modal-emoji{font-size: 4rem; margin-bottom: 10px;}
+.modal-header h2{margin: 0; font-size: 2.5rem; color: #fff; font-weight: 300;}
+.modal-body{padding: 30px;}
+.info-section{margin-bottom: 25px; padding: 15px; background: rgba(255,255,255,0.05); border-left: 3px solid rgba(255,107,107,0.5); border-radius: 5px;}
+.info-section h3{margin: 0 0 10px 0; font-size: 1.2rem; color: #ff6b6b; font-weight: 400;}
+.info-section p, .info-section pre{margin: 0; line-height: 1.6; color: rgba(255,255,255,0.9); font-size: 1rem;}
+.info-section pre{white-space: pre-wrap; font-family: 'Arial', sans-serif;}
+.highlight-section{background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(100,150,255,0.1)); border-left: 3px solid rgba(100,150,255,0.7);}
+.highlight-section h3{color: #6496ff;}
+
+/* Scrollbar for modal */
+.modal-content::-webkit-scrollbar{width: 8px;}
+.modal-content::-webkit-scrollbar-track{background: rgba(0,0,0,0.3); border-radius: 10px;}
+.modal-content::-webkit-scrollbar-thumb{background: rgba(255,107,107,0.5); border-radius: 10px;}
+.modal-content::-webkit-scrollbar-thumb:hover{background: rgba(255,107,107,0.7);}
 
 /* Scroll Indicator */
 .scroll-indicator{position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); animation: bounce 2s infinite; opacity: 0.7;}

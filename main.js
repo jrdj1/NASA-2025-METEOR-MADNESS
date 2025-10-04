@@ -1,3 +1,61 @@
+// Datos de meteoritos reales
+const realMeteorsData = {
+  chelyabinsk: {
+    name: "Chelyabinsk",
+    emoji: "🌠",
+    date: "15 de febrero de 2013",
+    location: "Chelyabinsk, Rusia",
+    size: "~20 metros de diámetro",
+    mass: "~12,000 toneladas",
+    speed: "~19 km/s al entrar en la atmósfera",
+    energy: "~500 kilotones de TNT",
+    impact: "El meteorito explotó en el aire a unos 30 km de altura, generando una onda de choque que rompió ventanas y causó heridas a más de 1,500 personas.",
+    crater: "No formó cráter, fragmentos encontrados en el lago Chebarkul",
+    facts: "• Detectado solo horas antes del impacto\n• La explosión fue más brillante que el sol\n• Fue el mayor evento de este tipo desde Tunguska"
+  },
+  tunguska: {
+    name: "Tunguska",
+    emoji: "💫",
+    date: "30 de junio de 1908",
+    location: "Río Tunguska Pedregoso, Siberia",
+    size: "~60-190 metros de diámetro",
+    mass: "~1-10 millones de toneladas",
+    speed: "~15 km/s (estimado)",
+    energy: "~10-15 megatones de TNT",
+    impact: "Explosión aérea que arrasó 2,150 km² de bosque, derribando unos 80 millones de árboles. Se cree que explotó entre 5-10 km de altura.",
+    crater: "No dejó cráter visible",
+    facts: "• El evento más destructivo registrado en la historia\n• Testigos reportaron un resplandor azul en el cielo\n• Se sintió a cientos de kilómetros de distancia"
+  },
+  chicxulub: {
+    name: "Chicxulub",
+    emoji: "🦕",
+    date: "Hace ~66 millones de años",
+    location: "Península de Yucatán, México",
+    size: "~10-15 kilómetros de diámetro",
+    mass: "~1-4 billones de toneladas",
+    speed: "~20 km/s (estimado)",
+    energy: "~100,000,000 megatones de TNT",
+    impact: "Causó la extinción masiva del Cretácico-Paleógeno, eliminando aproximadamente el 75% de todas las especies, incluyendo los dinosaurios no aviares.",
+    crater: "Cráter de 180 km de diámetro, parcialmente bajo el agua",
+    facts: "• Desencadenó tsunamis masivos y incendios globales\n• Levantó nubes de polvo que bloquearon el sol por años\n• Marcó el fin de la era de los dinosaurios"
+  },
+  barringer: {
+    name: "Barringer (Meteor Crater)",
+    emoji: "🌑",
+    date: "Hace ~50,000 años",
+    location: "Arizona, Estados Unidos",
+    size: "~50 metros de diámetro",
+    mass: "~300,000 toneladas",
+    speed: "~12.8 km/s (estimado)",
+    energy: "~10 megatones de TNT",
+    impact: "Creó un cráter perfectamente preservado, uno de los mejor estudiados del mundo. El impacto vaporizó gran parte del meteorito.",
+    crater: "1.2 km de diámetro, 170 metros de profundidad",
+    facts: "• Primer cráter probado como de origen meteórico\n• Aún contiene fragmentos del meteorito\n• Es un sitio turístico y de investigación activo"
+  }
+};
+
+let selectedMeteorId = null;
+
 function initialize() {
   // Mode selector functionality
   const modeButtons = document.querySelectorAll('.mode-btn');
@@ -40,10 +98,54 @@ function initialize() {
       realOptions.forEach(opt => opt.classList.remove('active'));
       this.classList.add('active');
       const meteorId = this.getAttribute('data-meteor-id');
+      selectedMeteorId = meteorId;
       console.log('Selected real meteor:', meteorId);
-      // Functionality will be added later (API call)
     });
   });
+  
+  // Evento click en la imagen del meteorito
+  const meteorImg = document.getElementById('meteor_img');
+  const meteorModal = document.getElementById('meteor-modal');
+  const modalClose = document.getElementById('modal-close');
+  
+  meteorImg.addEventListener('click', function() {
+    if (selectedMeteorId && realMeteorsData[selectedMeteorId]) {
+      showMeteorInfo(selectedMeteorId);
+    } else {
+      alert('Por favor, selecciona un meteorito real primero en la sección superior.');
+    }
+  });
+  
+  // Cerrar modal
+  modalClose.addEventListener('click', function() {
+    meteorModal.style.display = 'none';
+  });
+  
+  // Cerrar modal al hacer click fuera
+  window.addEventListener('click', function(event) {
+    if (event.target === meteorModal) {
+      meteorModal.style.display = 'none';
+    }
+  });
+  
+  // Función para mostrar información del meteorito
+  function showMeteorInfo(meteorId) {
+    const data = realMeteorsData[meteorId];
+    
+    document.getElementById('modal-emoji').textContent = data.emoji;
+    document.getElementById('modal-name').textContent = data.name;
+    document.getElementById('modal-date').textContent = data.date;
+    document.getElementById('modal-location').textContent = data.location;
+    document.getElementById('modal-size').textContent = data.size;
+    document.getElementById('modal-mass').textContent = data.mass;
+    document.getElementById('modal-speed').textContent = data.speed;
+    document.getElementById('modal-energy').textContent = data.energy;
+    document.getElementById('modal-impact').textContent = data.impact;
+    document.getElementById('modal-crater').textContent = data.crater;
+    document.getElementById('modal-facts').textContent = data.facts;
+    
+    meteorModal.style.display = 'flex';
+  }
   
   // Initialize stars background
   const starsCanvas = document.getElementById('stars_canvas');
