@@ -325,21 +325,31 @@ function initialize() {
     starsCanvas.height = window.innerHeight;
   });
   
-  // Initialize Earth map with zoom disabled and satellite texture
+  // Initialize Earth map with zoom enabled and satellite texture
   var earth = new WE.map('earth_div', {
     zoom: 3,
     center: [0, 0],
-    zooming: false,
-    scrollWheelZoom: false
+    zooming: true,
+    scrollWheelZoom: true
   });
   WE.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: ''
   }).addTo(earth);
   
-  // Auto-rotate Earth slowly
+  // Auto-rotate Earth slowly, with speed decreasing as zoom increases
   function rotateEarth() {
     const currentCenter = earth.getCenter();
-    earth.setCenter([currentCenter[0], currentCenter[1] + 0.02]);
+    const currentZoom = earth.getZoom();
+    
+    // Calculate rotation speed based on zoom level
+    // At zoom 3 (default): speed = 0.01 (slower than before)
+    // At zoom 5: speed = 0.002
+    // At zoom 7+: speed = 0.0002 (extremely slow)
+    const baseSpeed = 0.01;
+    const zoomFactor = Math.pow(0.3, (currentZoom - 3) / 1.2);
+    const rotationSpeed = baseSpeed * zoomFactor;
+    
+    earth.setCenter([currentCenter[0], currentCenter[1] + rotationSpeed]);
     requestAnimationFrame(rotateEarth);
   }
   
