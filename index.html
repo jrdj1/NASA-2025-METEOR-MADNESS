@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://www.webglearth.com/v2/api.js"></script>
+    <script src="main.js"></script>
+    <title>Meteor Simulator</title>
+    <meta name="description" content="This is a basic tutorial for showing a map on a 3D globe. It could be used on web and Android & iOS mobile devices.">
+  </head>
+  <body onload="initialize()">
+    <canvas id="stars_canvas"></canvas>
+    
+    <!-- Hero Section -->
+    <section id="hero">
+      <h1><span class="highlight">MMS</span> Meteor Madness Simulator</h1>
+      <p>Simulate meteor impacts on Earth</p>
+      
+      <!-- Mode Selector -->
+      <div id="mode-selector">
+        <button class="mode-btn active" data-mode="simulate">Simulate Impact</button>
+        <button class="mode-btn" data-mode="real">Real Meteors</button>
+      </div>
+      
+      <!-- Simulation Mode -->
+      <div id="simulation-mode" class="mode-content active">
+        <h2>Choose Meteor Size</h2>
+        <div id="meteor-selector">
+          <div class="meteor-option active" data-meteor="small">
+            <h3>🪨 Small</h3>
+            <p>10-50 meters</p>
+          </div>
+          <div class="meteor-option" data-meteor="medium">
+            <h3>☄️ Medium</h3>
+            <p>50-200 meters</p>
+          </div>
+          <div class="meteor-option" data-meteor="large">
+            <h3>💥 Large</h3>
+            <p>200-500 meters</p>
+          </div>
+          <div class="meteor-option" data-meteor="catastrophic">
+            <h3>🔥 Catastrophic</h3>
+            <p>500+ meters</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Real Meteors Mode -->
+      <div id="real-mode" class="mode-content">
+        <h2>Known Real Meteors</h2>
+        <div id="real-meteor-selector">
+          <div class="meteor-option" data-meteor-id="chelyabinsk">
+            <h3>🌠 Chelyabinsk</h3>
+            <p>Russia, 2013 - 20m</p>
+          </div>
+          <div class="meteor-option" data-meteor-id="tunguska">
+            <h3>💫 Tunguska</h3>
+            <p>Siberia, 1908 - 60m</p>
+          </div>
+          <div class="meteor-option" data-meteor-id="chicxulub">
+            <h3>🦕 Chicxulub</h3>
+            <p>Mexico, 66M years ago - 10km</p>
+          </div>
+          <div class="meteor-option" data-meteor-id="barringer">
+            <h3>🌑 Barringer</h3>
+            <p>Arizona, 50k years ago - 50m</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="scroll-indicator"></div>
+    </section>
+    
+    <!-- Main Content Section -->
+    <div id="container">
+      <div id="left_panel">
+        <img src="images/metheor.png" alt="Meteorito" id="meteor_img" title="Haz clic para ver información">
+      </div>
+      <div id="right_panel">
+        <div id="earth_div"></div>
+      </div>
+    </div>
+    
+    <!-- Modal de información del meteorito -->
+    <div id="meteor-modal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="modal-close">&times;</span>
+        <div class="modal-header">
+          <div class="modal-emoji" id="modal-emoji">🌠</div>
+          <h2 id="modal-name">Meteorito</h2>
+        </div>
+        <div class="modal-body">
+          <div class="info-section">
+            <h3>📅 Fecha del Impacto</h3>
+            <p id="modal-date"></p>
+          </div>
+          <div class="info-section">
+            <h3>📍 Ubicación</h3>
+            <p id="modal-location"></p>
+          </div>
+          <div class="info-section">
+            <h3>📏 Tamaño</h3>
+            <p id="modal-size"></p>
+          </div>
+          <div class="info-section">
+            <h3>⚖️ Masa</h3>
+            <p id="modal-mass"></p>
+          </div>
+          <div class="info-section">
+            <h3>⚡ Velocidad</h3>
+            <p id="modal-speed"></p>
+          </div>
+          <div class="info-section">
+            <h3>💥 Energía del Impacto</h3>
+            <p id="modal-energy"></p>
+          </div>
+          <div class="info-section">
+            <h3>🌍 Impacto</h3>
+            <p id="modal-impact"></p>
+          </div>
+          <div class="info-section">
+            <h3>🕳️ Cráter</h3>
+            <p id="modal-crater"></p>
+          </div>
+          <div class="info-section highlight-section">
+            <h3>✨ Datos Interesantes</h3>
+            <pre id="modal-facts"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Chatbot Section -->
+    <section id="chatbot-section">
+      <div class="chatbot-container">
+        <h2>🤖 Ask About Meteors</h2>
+        <p class="chatbot-description">Get information about meteor impacts, statistics, and scientific data</p>
+        
+        <div id="chat-window">
+          <div class="chat-message bot">
+            <p>👋 Hello! I'm your meteor expert assistant. Ask me anything about meteors, impacts, or our simulation!</p>
+          </div>
+        </div>
+        
+        <div class="chat-input-container">
+          <input type="text" id="chat-input" placeholder="Type your question here..." disabled>
+          <button id="chat-send" disabled>Send</button>
+        </div>
+        <p class="coming-soon">Coming soon...</p>
+      </div>
+      
+      <!-- Team & Copyright -->
+      <div class="footer">
+        <div class="team-section">
+          <h3>Team Members</h3>
+          <div class="team-members">
+            <div class="member">
+              <div class="member-avatar">👨‍💻</div>
+              <p class="member-name">John Doe</p>
+              <p class="member-role">Lead Developer</p>
+            </div>
+            <div class="member">
+              <div class="member-avatar">👩‍🔬</div>
+              <p class="member-name">Jane Smith</p>
+              <p class="member-role">Data Scientist</p>
+            </div>
+            <div class="member">
+              <div class="member-avatar">👨‍🎨</div>
+              <p class="member-name">Mike Johnson</p>
+              <p class="member-role">UI/UX Designer</p>
+            </div>
+            <div class="member">
+              <div class="member-avatar">👩‍💼</div>
+              <p class="member-name">Sarah Williams</p>
+              <p class="member-role">Project Manager</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="copyright">
+          <p>© 2025 MMS - Meteor Madness Simulator. All rights reserved.</p>
+          <p>Data provided by NASA APIs | Built for NASA Space Apps Challenge</p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
