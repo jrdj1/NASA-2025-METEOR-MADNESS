@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <link rel="stylesheet" href="css/styles.css" />
-    <script src="main.js"></script>
+    <!--<script src="main.js"></script>-->
 
     <style>
       /* Simulator Section */
@@ -193,7 +193,7 @@
         display: flex;
       }
 
-      /* 3D Globe Panel - Combined meteor + earth */
+      /* 3D Globe Panel */
       #globe-panel {
         display: none;
         flex-direction: row;
@@ -230,99 +230,23 @@
       #meteor_img:hover {
         transform: scale(1.1);
         filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.6));
-        animation: shake-hover 2.5s infinite;
       }
 
       #meteor_img.size-small {
         max-width: 15%;
         max-height: 15%;
       }
-
       #meteor_img.size-medium {
         max-width: 25%;
         max-height: 25%;
       }
-
       #meteor_img.size-large {
         max-width: 35%;
         max-height: 35%;
       }
-
       #meteor_img.size-catastrophic {
         max-width: 45%;
         max-height: 45%;
-      }
-
-      @keyframes shake {
-        0% {
-          transform: translate(0px, 0px) rotate(0deg);
-        }
-        10% {
-          transform: translate(-1px, -2px) rotate(-0.5deg);
-        }
-        20% {
-          transform: translate(-3px, 0px) rotate(0.5deg);
-        }
-        30% {
-          transform: translate(3px, 2px) rotate(0deg);
-        }
-        40% {
-          transform: translate(1px, -1px) rotate(0.5deg);
-        }
-        50% {
-          transform: translate(-1px, 2px) rotate(-0.5deg);
-        }
-        60% {
-          transform: translate(-3px, 1px) rotate(0deg);
-        }
-        70% {
-          transform: translate(3px, 1px) rotate(-0.5deg);
-        }
-        80% {
-          transform: translate(-1px, -1px) rotate(0.5deg);
-        }
-        90% {
-          transform: translate(1px, 2px) rotate(0deg);
-        }
-        100% {
-          transform: translate(0px, 0px) rotate(0deg);
-        }
-      }
-
-      @keyframes shake-hover {
-        0% {
-          transform: scale(1.1) translate(0px, 0px) rotate(0deg);
-        }
-        10% {
-          transform: scale(1.1) translate(-2px, -3px) rotate(-0.8deg);
-        }
-        20% {
-          transform: scale(1.1) translate(-4px, 1px) rotate(0.8deg);
-        }
-        30% {
-          transform: scale(1.1) translate(4px, 3px) rotate(-0.3deg);
-        }
-        40% {
-          transform: scale(1.1) translate(2px, -2px) rotate(0.8deg);
-        }
-        50% {
-          transform: scale(1.1) translate(-2px, 3px) rotate(-0.8deg);
-        }
-        60% {
-          transform: scale(1.1) translate(-4px, 2px) rotate(0.3deg);
-        }
-        70% {
-          transform: scale(1.1) translate(4px, 2px) rotate(-0.8deg);
-        }
-        80% {
-          transform: scale(1.1) translate(-2px, -2px) rotate(0.8deg);
-        }
-        90% {
-          transform: scale(1.1) translate(2px, 3px) rotate(-0.3deg);
-        }
-        100% {
-          transform: scale(1.1) translate(0px, 0px) rotate(0deg);
-        }
       }
 
       #earth_div {
@@ -331,7 +255,7 @@
         border-radius: 10px;
       }
 
-      /* Other panels */
+      /* Map Panel */
       #map-container {
         height: 100%;
         width: 100%;
@@ -358,6 +282,7 @@
         pointer-events: none;
       }
 
+      /* Statistics Panel */
       #statistics-panel {
         padding: 20px;
         overflow-y: auto;
@@ -394,6 +319,7 @@
         font-size: 0.9rem;
       }
 
+      /* Analysis Panel */
       #analysis-panel {
         padding: 20px;
         overflow-y: auto;
@@ -436,6 +362,7 @@
         margin-right: 8px;
       }
 
+      /* Prevention Panel */
       #prevention-panel {
         padding: 20px;
         overflow-y: auto;
@@ -547,18 +474,6 @@
         padding: 12px 15px;
         border-radius: 12px;
         max-width: 80%;
-        animation: slideIn 0.3s;
-      }
-
-      @keyframes slideIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
       }
 
       .chat-message.bot {
@@ -644,7 +559,7 @@
       }
     </style>
   </head>
-  <body onload="initialize()">
+  <body onload="initializeApp()">
     <canvas id="stars_canvas"></canvas>
 
     <!-- Hero Section -->
@@ -696,7 +611,7 @@
       <div class="scroll-indicator"></div>
     </section>
 
-    <!-- Simulator Section with Tabs -->
+    <!-- Simulator Section -->
     <section id="simulator-section">
       <div id="control-panel">
         <div class="panel-section">
@@ -746,6 +661,34 @@
           </div>
 
           <div class="control-group">
+            <label>Asteroid Density</label>
+            <select id="density" class="control-select">
+              <option value="1500">Porous (comet) - 1500 kg/m³</option>
+              <option value="3000" selected>Rocky - 3000 kg/m³</option>
+              <option value="5000">Dense (chondrite) - 5000 kg/m³</option>
+              <option value="8000">Metallic (iron) - 8000 kg/m³</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Terrain Type</label>
+            <select id="terrain" class="control-select">
+              <option value="ocean">Ocean (tsunami)</option>
+              <option value="rural">Rural (low impact)</option>
+              <option value="urban" selected>Urban (high density)</option>
+              <option value="megacity">Megacity (extreme density)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Time of Impact</label>
+            <select id="time-of-day" class="control-select">
+              <option value="night">Night (fewer casualties)</option>
+              <option value="day" selected>Day (more casualties)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
             <label>Impact Location</label>
             <div class="control-value" id="location-display">Click on map</div>
           </div>
@@ -755,30 +698,26 @@
           SIMULATE IMPACT
         </button>
 
-        <div id="results-panel" style="display: none">
+        <!--<div id="results-panel" style="display: none">
           <h3 style="color: #ff6b6b; margin-bottom: 15px">Impact Results</h3>
-
           <div class="result-item">
             <div class="result-label">Energy Released</div>
             <div class="result-value" id="result-energy">-</div>
           </div>
-
           <div class="result-item">
             <div class="result-label">Destruction Radius</div>
             <div class="result-value" id="result-radius">-</div>
           </div>
-
           <div class="result-item">
             <div class="result-label">Crater Diameter</div>
             <div class="result-value" id="result-crater">-</div>
           </div>
-
           <div class="result-item">
             <div class="result-label">Hiroshima Equivalent</div>
             <div class="result-value" id="result-equivalent">-</div>
           </div>
         </div>
-      </div>
+      --></div>
 
       <div id="content-container">
         <div id="tabs">
@@ -790,13 +729,45 @@
         </div>
 
         <div id="content-area">
-          <!-- 3D Globe Panel with Meteor -->
+          <!-- AÑADE ESTO AQUÍ, ANTES DE LOS PANELES -->
+          <div id="impact-results-overlay" style="display: none">
+            <div class="overlay-header">
+              <h3>💥 Impact Results</h3>
+              <button
+                onclick="resetImpact()"
+                class="reset-btn"
+                title="Clear impact"
+              >
+                🔄
+              </button>
+            </div>
+            <div class="overlay-content">
+              <div class="result-row">
+                <span class="result-label">Energy Released</span>
+                <span class="result-value" id="overlay-energy">-</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Destruction Radius</span>
+                <span class="result-value" id="overlay-radius">-</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Crater Diameter</span>
+                <span class="result-value" id="overlay-crater">-</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Impact Type</span>
+                <span class="result-value" id="overlay-type">-</span>
+              </div>
+            </div>
+          </div>
+          <!-- 3D Globe Panel -->
           <div id="globe-panel" class="content-panel active">
             <div id="meteor-side">
               <img
                 src="images/metheor.png"
                 alt="Meteorite"
                 id="meteor_img"
+                class="meteor-shake"
                 title="Click to see info"
               />
             </div>
@@ -821,26 +792,22 @@
                 <div class="big-number" id="stat-energy">0</div>
                 <div class="unit">Megatons TNT</div>
               </div>
-
               <div class="stat-card">
                 <h4>DESTRUCTION ZONE</h4>
                 <div class="big-number" id="stat-radius">0</div>
                 <div class="unit">km radius</div>
               </div>
-
               <div class="stat-card">
                 <h4>HIROSHIMA BOMBS</h4>
                 <div class="big-number" id="stat-hiroshima">0</div>
                 <div class="unit">equivalent</div>
               </div>
-
               <div class="stat-card">
                 <h4>EARTHQUAKE</h4>
                 <div class="big-number" id="stat-earthquake">0</div>
                 <div class="unit">Richter scale</div>
               </div>
             </div>
-
             <div
               style="
                 background: rgba(255, 255, 255, 0.05);
@@ -865,7 +832,6 @@
                 <li>Thermal radiation igniting fires</li>
               </ul>
             </div>
-
             <div class="analysis-section">
               <h4>Secondary Effects (Hours to Days)</h4>
               <p>Following the initial impact:</p>
@@ -877,7 +843,6 @@
                 <li>Communication disruption</li>
               </ul>
             </div>
-
             <div class="analysis-section">
               <h4>Long-term Consequences (Weeks to Months)</h4>
               <p>Lasting environmental effects:</p>
@@ -904,7 +869,6 @@
                 <strong>Success:</strong> 85% (DART proven)
               </p>
             </div>
-
             <div class="mitigation-card">
               <h4>🛸 Gravity Tractor</h4>
               <p>
@@ -916,7 +880,6 @@
                 <strong>Success:</strong> 70% (theoretical)
               </p>
             </div>
-
             <div class="mitigation-card">
               <h4>☢️ Nuclear Deflection</h4>
               <p>Nuclear device vaporizes surface material, creating thrust.</p>
@@ -925,7 +888,6 @@
                 <strong>Success:</strong> 90% (simulated)
               </p>
             </div>
-
             <div class="mitigation-card">
               <h4>🔭 Early Warning Systems</h4>
               <p>
@@ -973,12 +935,12 @@
       <div class="modal-content">
         <span class="close" id="modal-close">&times;</span>
         <div class="modal-header">
-          <div class="modal-emoji" id="modal-emoji">🌠</div>
+          <div class="modal-emoji" id="modal-emoji">🌍</div>
           <h2 id="modal-name">Meteorite</h2>
         </div>
         <div class="modal-body">
           <div class="info-section">
-            <h3>📅 Fecha de aproximación a la tierra</h3>
+            <h3>📅 Approach Date</h3>
             <p id="modal-date"></p>
           </div>
           <div class="info-section">
@@ -1017,7 +979,8 @@
       </div>
     </div>
 
-    <div class="footer">
+    <!-- Footer -->
+    <div id="footer">
       <div class="team-section">
         <h3>Team Members</h3>
         <div class="team-members">
@@ -1043,279 +1006,12 @@
           </div>
         </div>
       </div>
-
       <div class="copyright">
         <p>© 2025 MMS - Meteor Madness Simulator. All rights reserved.</p>
         <p>Data provided by NASA APIs | Built for NASA Space Apps Challenge</p>
       </div>
     </div>
-
-    <script>
-      let impactMap;
-      let impactMarker;
-      let destructionCircles = [];
-      let impactLocation = { lat: 40.4168, lng: -3.7038 };
-      let comparisonChart;
-
-      window.addEventListener("load", function () {
-        setTimeout(initializeNewFeatures, 1000);
-      });
-
-      function initializeNewFeatures() {
-        console.log("Initializing features...");
-        initializeSimulatorControls();
-        initializeLeafletMap();
-        initializeStatisticsChart();
-      }
-
-      function initializeSimulatorControls() {
-        const diameter = document.getElementById("diameter");
-        const velocity = document.getElementById("velocity");
-        const angle = document.getElementById("angle");
-
-        if (diameter) {
-          diameter.addEventListener("input", (e) => {
-            document.getElementById("diameter-value").textContent =
-              e.target.value;
-          });
-        }
-
-        if (velocity) {
-          velocity.addEventListener("input", (e) => {
-            document.getElementById("velocity-value").textContent =
-              e.target.value;
-          });
-        }
-
-        if (angle) {
-          angle.addEventListener("input", (e) => {
-            document.getElementById("angle-value").textContent = e.target.value;
-          });
-        }
-      }
-
-      function initializeLeafletMap() {
-        if (typeof L === "undefined") {
-          console.warn("Leaflet not loaded");
-          return;
-        }
-
-        try {
-          impactMap = L.map("impact-map").setView(
-            [impactLocation.lat, impactLocation.lng],
-            4
-          );
-
-          L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            attribution: "© OpenStreetMap",
-            maxZoom: 18,
-          }).addTo(impactMap);
-
-          impactMap.on("click", function (e) {
-            impactLocation = { lat: e.latlng.lat, lng: e.latlng.lng };
-
-            if (impactMarker) {
-              impactMap.removeLayer(impactMarker);
-            }
-
-            impactMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-              icon: L.divIcon({
-                className: "impact-marker",
-                html: "💥",
-                iconSize: [30, 30],
-              }),
-            }).addTo(impactMap);
-
-            document.getElementById(
-              "location-display"
-            ).textContent = `${e.latlng.lat.toFixed(
-              2
-            )}°, ${e.latlng.lng.toFixed(2)}°`;
-          });
-
-          console.log("Leaflet initialized");
-        } catch (e) {
-          console.error("Error initializing Leaflet:", e);
-        }
-      }
-
-      function initializeStatisticsChart() {
-        if (typeof Chart === "undefined") {
-          console.warn("Chart.js not loaded");
-          return;
-        }
-
-        const ctx = document.getElementById("comparison-chart");
-        if (!ctx) return;
-
-        try {
-          comparisonChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-              labels: [
-                "Your Impact",
-                "Chelyabinsk",
-                "Tunguska",
-                "Barringer",
-                "Chicxulub",
-              ],
-              datasets: [
-                {
-                  label: "Energy (Megatons)",
-                  data: [0, 0.5, 15, 10000, 100000000],
-                  backgroundColor: [
-                    "rgba(255, 107, 107, 0.8)",
-                    "rgba(52, 152, 219, 0.8)",
-                    "rgba(46, 204, 113, 0.8)",
-                    "rgba(155, 89, 182, 0.8)",
-                    "rgba(241, 196, 15, 0.8)",
-                  ],
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: true,
-              scales: {
-                y: {
-                  type: "logarithmic",
-                  title: { display: true, text: "Energy (MT)", color: "#fff" },
-                  ticks: { color: "#aaa" },
-                  grid: { color: "rgba(255, 255, 255, 0.1)" },
-                },
-                x: {
-                  ticks: { color: "#aaa" },
-                  grid: { color: "rgba(255, 255, 255, 0.1)" },
-                },
-              },
-              plugins: {
-                legend: { labels: { color: "#fff" } },
-              },
-            },
-          });
-
-          console.log("Chart initialized");
-        } catch (e) {
-          console.error("Error initializing chart:", e);
-        }
-      }
-
-      function calculateImpact() {
-        const diameter = parseFloat(document.getElementById("diameter").value);
-        const velocity = parseFloat(document.getElementById("velocity").value);
-        const angle = parseFloat(document.getElementById("angle").value);
-
-        const density = 3000;
-        const radius = diameter / 2;
-        const volume = (4 / 3) * Math.PI * Math.pow(radius, 3);
-        const mass = volume * density;
-        const velocityMs = velocity * 1000;
-        const energyJoules = 0.5 * mass * Math.pow(velocityMs, 2);
-        const energyMegatons = energyJoules / 4.184e15;
-        const destructionRadius = 2.2 * Math.pow(energyMegatons, 0.33);
-        const angleRad = (angle * Math.PI) / 180;
-        const craterDiameter =
-          1.8 * Math.pow(diameter, 0.78) * Math.pow(Math.sin(angleRad), 0.33);
-        const hiroshimaEquivalent = energyMegatons / 0.015;
-        const earthquakeMagnitude = 4 + 0.67 * Math.log10(energyMegatons);
-
-        document.getElementById("results-panel").style.display = "block";
-        document.getElementById(
-          "result-energy"
-        ).textContent = `${energyMegatons.toFixed(2)} MT`;
-        document.getElementById(
-          "result-radius"
-        ).textContent = `${destructionRadius.toFixed(2)} km`;
-        document.getElementById("result-crater").textContent = `${(
-          craterDiameter / 1000
-        ).toFixed(2)} km`;
-        document.getElementById(
-          "result-equivalent"
-        ).textContent = `${hiroshimaEquivalent.toFixed(0)} bombs`;
-
-        document.getElementById("stat-energy").textContent =
-          energyMegatons.toFixed(2);
-        document.getElementById("stat-radius").textContent =
-          destructionRadius.toFixed(2);
-        document.getElementById("stat-hiroshima").textContent =
-          hiroshimaEquivalent.toFixed(0);
-        document.getElementById("stat-earthquake").textContent =
-          earthquakeMagnitude.toFixed(1);
-
-        if (comparisonChart) {
-          comparisonChart.data.datasets[0].data[0] = energyMegatons;
-          comparisonChart.update();
-        }
-
-        drawDestructionCircles(destructionRadius);
-      }
-
-      function drawDestructionCircles(radius) {
-        if (!impactMap) return;
-
-        destructionCircles.forEach((circle) => impactMap.removeLayer(circle));
-        destructionCircles = [];
-
-        const zones = [
-          { radius: radius, color: "#ff0000", label: "Total Destruction" },
-          { radius: radius * 2, color: "#ff6b00", label: "Severe Damage" },
-          { radius: radius * 3, color: "#ffd700", label: "Moderate Damage" },
-          { radius: radius * 5, color: "#4169e1", label: "Shockwave" },
-        ];
-
-        zones.forEach((zone) => {
-          const circle = L.circle([impactLocation.lat, impactLocation.lng], {
-            radius: zone.radius * 1000,
-            color: zone.color,
-            fillColor: zone.color,
-            fillOpacity: 0.2,
-            weight: 2,
-          }).addTo(impactMap);
-
-          circle.bindPopup(
-            `<b>${zone.label}</b><br>Radius: ${zone.radius.toFixed(2)} km`
-          );
-          destructionCircles.push(circle);
-        });
-
-        const bounds = L.latLngBounds(
-          destructionCircles.map((c) => c.getBounds())
-        );
-        impactMap.fitBounds(bounds);
-      }
-
-      function switchTab(tabName) {
-        const tabs = document.querySelectorAll(".tab");
-        tabs.forEach((tab) => tab.classList.remove("active"));
-        event.target.classList.add("active");
-
-        const panels = document.querySelectorAll(".content-panel");
-        panels.forEach((panel) => panel.classList.remove("active"));
-
-        switch (tabName) {
-          case "globe":
-            document.getElementById("globe-panel").classList.add("active");
-            break;
-          case "map":
-            document.getElementById("map-panel").classList.add("active");
-            setTimeout(() => impactMap && impactMap.invalidateSize(), 100);
-            break;
-          case "statistics":
-            document.getElementById("statistics-panel").classList.add("active");
-            break;
-          case "analysis":
-            document.getElementById("analysis-panel").classList.add("active");
-            break;
-          case "prevention":
-            document.getElementById("prevention-panel").classList.add("active");
-            break;
-        }
-      }
-
-      function toggleChatbot() {
-        const chatWindow = document.getElementById("chatbot-window");
-        chatWindow.classList.toggle("open");
-      }
-    </script>
+    <!--<script src="main.js"></script>-->
+    <script src="js/complete.js"></script>
   </body>
 </html>
