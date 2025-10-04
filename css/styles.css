@@ -171,8 +171,64 @@ html, body{padding: 0; margin: 0; background: #000; color: #fff; font-family: 'A
 #container{display: flex; width: 100%; height: 100vh; position: relative; z-index: 1;}
 #left_panel{width: 50%; height: 100%; display: flex; align-items: center; justify-content: center;}
 #right_panel{width: 50%; height: 100%; position: relative;}
-#meteor_img{max-width: 40%; max-height: 40%; object-fit: contain; cursor: pointer; transition: transform 0.3s, filter 0.3s;}
-#meteor_img:hover{transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,107,107,0.6));}
+#meteor_img{max-width: 45%; max-height: 45%; object-fit: contain; cursor: pointer; transition: transform 0.3s, filter 0.3s; animation: shake 4s infinite;}
+#meteor_img:hover{transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(255,107,107,0.6)); animation: shake-hover 2.5s infinite;}
+
+/* Animación de temblor para la imagen del meteorito */
+@keyframes shake {
+  0% { transform: translate(0px, 0px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-0.5deg); }
+  20% { transform: translate(-3px, 0px) rotate(0.5deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(0.5deg); }
+  50% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-0.5deg); }
+  80% { transform: translate(-1px, -1px) rotate(0.5deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+@keyframes shake-hover {
+  0% { transform: scale(1.1) translate(0px, 0px) rotate(0deg); }
+  10% { transform: scale(1.1) translate(-2px, -3px) rotate(-0.8deg); }
+  20% { transform: scale(1.1) translate(-4px, 1px) rotate(0.8deg); }
+  30% { transform: scale(1.1) translate(4px, 3px) rotate(-0.3deg); }
+  40% { transform: scale(1.1) translate(2px, -2px) rotate(0.8deg); }
+  50% { transform: scale(1.1) translate(-2px, 3px) rotate(-0.8deg); }
+  60% { transform: scale(1.1) translate(-4px, 2px) rotate(0.3deg); }
+  70% { transform: scale(1.1) translate(4px, 2px) rotate(-0.8deg); }
+  80% { transform: scale(1.1) translate(-2px, -2px) rotate(0.8deg); }
+  90% { transform: scale(1.1) translate(2px, 3px) rotate(-0.3deg); }
+  100% { transform: scale(1.1) translate(0px, 0px) rotate(0deg); }
+}
+
+/* Tamaños de meteorito dinámicos */
+#meteor_img.size-small {
+  max-width: 15%; 
+  max-height: 15%;
+}
+
+#meteor_img.size-medium {
+  max-width: 25%; 
+  max-height: 25%;
+}
+
+#meteor_img.size-large {
+  max-width: 35%; 
+  max-height: 35%;
+}
+
+#meteor_img.size-catastrophic {
+  max-width: 45%; 
+  max-height: 45%;
+}
+
+/* Transición suave para cambios de tamaño */
+#meteor_img {
+  transition: max-width 0.6s ease, max-height 0.6s ease, transform 0.3s, filter 0.3s;
+}
+
 #earth_div{width: 100%; height: 100%;}
 .webgl-earth_link, .cesium-credit-textContainer{display: none !important;}
 

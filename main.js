@@ -1,5 +1,37 @@
 let selectedMeteorId = null;
 
+// Función para cambiar el tamaño de la imagen del meteorito
+function updateMeteorSize(sizeCategory) {
+  const meteorImg = document.getElementById('meteor_img');
+  
+  // Remover todas las clases de tamaño existentes
+  meteorImg.classList.remove('size-small', 'size-medium', 'size-large', 'size-catastrophic');
+  
+  // Añadir la nueva clase de tamaño
+  if (sizeCategory) {
+    meteorImg.classList.add(`size-${sizeCategory}`);
+  }
+}
+
+// Función para determinar tamaño basado en diámetro (para API NASA)
+function getSizeCategoryFromDiameter(avgDiameter) {
+  if (avgDiameter > 500) return 'catastrophic';
+  if (avgDiameter > 200) return 'large';
+  if (avgDiameter > 50) return 'medium';
+  return 'small';
+}
+
+// Función para hacer scroll suave hacia la sección principal
+function scrollToMainContent() {
+  const container = document.getElementById('container');
+  if (container) {
+    container.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+}
+
 function initialize() {
   // Mode selector functionality
   const modeButtons = document.querySelectorAll('.mode-btn');
@@ -31,7 +63,14 @@ function initialize() {
       this.classList.add('active');
       const meteorType = this.getAttribute('data-meteor');
       console.log('Selected simulation meteor type:', meteorType);
-      // Functionality will be added later
+      
+      // Cambiar tamaño de la imagen según el tipo seleccionado
+      updateMeteorSize(meteorType);
+      
+      // Hacer scroll automático hacia la sección principal con un pequeño delay
+      setTimeout(() => {
+        scrollToMainContent();
+      }, 300);
     });
   });
   
@@ -111,12 +150,16 @@ function initialize() {
     const velocity = closeApproach.relative_velocity;
     const missDistance = closeApproach.miss_distance;
     
+    // Calcular diámetro promedio y actualizar tamaño de la imagen
+    const avgDiameter = (diameter.estimated_diameter_min + diameter.estimated_diameter_max) / 2;
+    const sizeCategory = getSizeCategoryFromDiameter(avgDiameter);
+    updateMeteorSize(sizeCategory);
+    
     // Usar emoji de datos adicionales si está disponible, o determinar según tamaño
     let emoji;
     if (additionalData && additionalData.emoji) {
       emoji = additionalData.emoji;
     } else {
-      const avgDiameter = (diameter.estimated_diameter_min + diameter.estimated_diameter_max) / 2;
       if (avgDiameter > 500) emoji = '🔥';
       else if (avgDiameter > 200) emoji = '💥';
       else if (avgDiameter > 50) emoji = '☄️';
@@ -460,7 +503,16 @@ function updateRealMeteorSelector(neos) {
           window.selectedNeoData = neo;
           selectedMeteorId = neo.id;
           
-          console.log('Selected NEO:', neo.name, 'ID:', neo.id);
+          // Cambiar tamaño de la imagen según el diámetro del asteroide
+          const sizeCategory = getSizeCategoryFromDiameter(avgDiameter);
+          updateMeteorSize(sizeCategory);
+          
+          // Hacer scroll automático hacia la sección principal con un pequeño delay
+          setTimeout(() => {
+            scrollToMainContent();
+          }, 300);
+          
+          console.log('Selected NEO:', neo.name, 'ID:', neo.id, 'Size:', sizeCategory);
         });
         
         rowContainer.appendChild(meteorOption);
