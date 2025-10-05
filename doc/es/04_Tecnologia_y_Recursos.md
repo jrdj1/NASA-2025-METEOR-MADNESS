@@ -30,7 +30,7 @@ El objetivo es crear una plataforma **ligera, modular y escalable**, capaz de pr
 
 ### 🔹 Backend
 - **Lenguaje:** Python 3.11  
-- **Framework:** Flask o Django (según requerimientos del servidor).  
+- **Framework:** FastAPI  
 - **Librerías científicas:**  
   - `NumPy` y `SciPy` para cálculos físicos y numéricos.  
   - `Astropy` para coordenadas astronómicas y propagación orbital.  
@@ -39,9 +39,7 @@ El objetivo es crear una plataforma **ligera, modular y escalable**, capaz de pr
 
 ### 🔹 Frontend
 - **Frameworks:**  
-  - `React` + `Three.js` → visualización 3D de trayectorias y órbitas.  
-  - `D3.js` → gráficos interactivos en 2D (impacto, energía, comparativas).  
-  - `CesiumJS` → renderizado de globo terrestre y proyección geográfica.  
+  - `React` + `Vue.js` → visualización 3D de trayectorias y órbitas.  
 - **UI Design:** interfaz limpia, adaptable (responsive) y centrada en la exploración visual.  
 
 ### 🔹 Infraestructura y despliegue
