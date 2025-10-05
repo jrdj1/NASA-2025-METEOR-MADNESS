@@ -68,6 +68,7 @@ function initializeApp() {
     initializeLeafletMap();
     initializeStatisticsChart();
     initializeModalEvents();
+    initializeChatbot();
     loadRealMeteorsFromAPI();
   }, 1000);
 }
@@ -1032,6 +1033,103 @@ function switchTab(tabName) {
 function toggleChatbot() {
   const chatWindow = document.getElementById("chatbot-window");
   chatWindow.classList.toggle("open");
+}
+
+// Initialize chatbot functionality
+function initializeChatbot() {
+  const chatInput = document.getElementById("chat-input");
+  const chatSend = document.getElementById("chat-send");
+  const chatMessages = document.getElementById("chat-messages");
+
+  // Send message on button click
+  if (chatSend) {
+    chatSend.addEventListener("click", sendChatMessage);
+  }
+
+  // Send message on Enter key
+  if (chatInput) {
+    chatInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
+  }
+}
+
+// Send message to chatbot
+async function sendChatMessage() {
+  const chatInput = document.getElementById("chat-input");
+  const chatMessages = document.getElementById("chat-messages");
+  const message = chatInput.value.trim();
+
+  if (!message) return;
+
+  // Add user message to chat
+  addChatMessage(message, "user");
+  chatInput.value = "";
+
+  // Show typing indicator
+  const typingDiv = document.createElement("div");
+  typingDiv.className = "chat-message bot typing-indicator";
+  typingDiv.innerHTML = "<p>Typing...</p>";
+  chatMessages.appendChild(typingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  try {
+    // Prepare request data
+    const requestData = {
+      message: message,
+      neo_data: window.selectedNeoData || null
+    };
+
+    // Send request to backend
+    const response = await fetch("http://localhost:6789/chatbot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    const data = await response.json();
+
+    // Remove typing indicator
+    chatMessages.removeChild(typingDiv);
+
+    if (data.success && data.response) {
+      addChatMessage(data.response, "bot");
+    } else {
+      addChatMessage(
+        "Sorry, I couldn't process your request. " + (data.error || ""),
+        "bot"
+      );
+    }
+  } catch (error) {
+    // Remove typing indicator
+    if (typingDiv.parentNode) {
+      chatMessages.removeChild(typingDiv);
+    }
+    addChatMessage(
+      "Error connecting to the chatbot. Please make sure the server is running.",
+      "bot"
+    );
+    console.error("Chatbot error:", error);
+  }
+}
+
+// Add message to chat window
+function addChatMessage(text, sender) {
+  const chatMessages = document.getElementById("chat-messages");
+  const messageDiv = document.createElement("div");
+  messageDiv.className = `chat-message ${sender}`;
+  
+  const messageP = document.createElement("p");
+  messageP.textContent = text;
+  messageDiv.appendChild(messageP);
+  
+  chatMessages.appendChild(messageDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 // ===============================================

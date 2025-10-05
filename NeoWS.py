@@ -5,6 +5,7 @@ import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+import google.generativeai as genai
 
 app = fastapi.FastAPI()
 
@@ -18,6 +19,14 @@ app.add_middleware(
 )
 
 load_dotenv()
+
+# Configure Gemini API
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    gemini_model = genai.GenerativeModel('gemini-2.0-flash-exp')
+else:
+    gemini_model = None
 
 def api_request(url):
     response = requests.get(url)
@@ -155,6 +164,73 @@ def get_recent_neos():
         }, file, indent=4)
     
     return data_neos
+
+# Chatbot endpoint using Gemini AI
+@app.post("/chatbot")
+async def chatbot(request: dict):
+    if not gemini_model:
+        return {"error": "Gemini API key not configured"}
+    
+    try:
+        user_message = request.get("message", "")
+        neo_data = request.get("neo_data", None)
+        
+        # Build context for Gemini based on selected NEO data
+        context = """Eres un asistente experto en asteroides y objetos cercanos a la Tierra (NEO). 
+Tu función es responder preguntas sobre asteroides de forma clara, educativa y precisa.
+Siempre responde en español y de manera amigable."""
+        
+        if neo_data:
+            # Extract relevant information from NEO data
+            name = neo_data.get("name", "Desconocido")
+            diameter = neo_data.get("estimated_diameter", {}).get("meters", {})
+            min_diameter = diameter.get("estimated_diameter_min", 0)
+            max_diameter = diameter.get("estimated_diameter_max", 0)
+            avg_diameter = (min_diameter + max_diameter) / 2
+            
+            is_hazardous = neo_data.get("is_potentially_hazardous_asteroid", False)
+            absolute_magnitude = neo_data.get("absolute_magnitude_h", "N/A")
+            
+            close_approach = neo_data.get("close_approach_data", [{}])[0]
+            velocity = close_approach.get("relative_velocity", {})
+            velocity_kmh = velocity.get("kilometers_per_hour", "N/A")
+            velocity_kms = velocity.get("kilometers_per_second", "N/A")
+            miss_distance = close_approach.get("miss_distance", {})
+            miss_distance_km = miss_distance.get("kilometers", "N/A")
+            miss_distance_lunar = miss_distance.get("lunar", "N/A")
+            approach_date = close_approach.get("close_approach_date_full", "N/A")
+            
+            context += f"""
+
+INFORMACIÓN DEL ASTEROIDE SELECCIONADO:
+- Nombre: {name}
+- Diámetro estimado: {min_diameter:.2f} - {max_diameter:.2f} metros (promedio: {avg_diameter:.2f} metros)
+- ¿Es potencialmente peligroso?: {'Sí' if is_hazardous else 'No'}
+- Magnitud absoluta: {absolute_magnitude}
+- Velocidad relativa: {velocity_kms} km/s ({velocity_kmh} km/h)
+- Distancia de aproximación: {miss_distance_km} km ({miss_distance_lunar} distancias lunares)
+- Fecha de aproximación: {approach_date}
+
+Usa esta información para responder preguntas específicas sobre este asteroide.
+Si el usuario pregunta sobre el impacto o daños, recuerda que este asteroide NO va a impactar la Tierra,
+pero puedes hacer estimaciones teóricas de qué pasaría SI impactara."""
+        
+        # Create the full prompt
+        full_prompt = f"{context}\n\nPregunta del usuario: {user_message}"
+        
+        # Generate response using Gemini
+        response = gemini_model.generate_content(full_prompt)
+        
+        return {
+            "response": response.text,
+            "success": True
+        }
+        
+    except Exception as e:
+        return {
+            "error": str(e),
+            "success": False
+        }
 
 if __name__ == "__main__":
     print("NeoWS API Interaction")
