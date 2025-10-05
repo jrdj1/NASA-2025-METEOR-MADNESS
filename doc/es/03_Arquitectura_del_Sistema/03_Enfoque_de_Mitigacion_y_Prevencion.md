@@ -7,14 +7,14 @@ Diseñar un **motor de decisión inteligente** capaz de **proponer estrategias m
 
 ## 🔁 Pipeline general (orden actualizado)
 
-1. **Entrada de contexto**
-2. **Análisis de consecuencias ambientales**
-3. **Clasificación del escenario**
-4. **Generación de estrategias candidatas**
-5. **Evaluación y priorización (MCDA)**
-6. **Optimización temporal y de recursos**
-7. **Validación y robustez**
-8. **Generación de salida explicativa**
+1. Entrada de contexto
+2. Análisis de consecuencias ambientales
+3. Clasificación del escenario
+4. Generación de estrategias candidatas
+5. Evaluación y priorización (MCDA)
+6. Optimización temporal y de recursos
+7. Validación y robustez
+8. Generación de salida explicativa
 
 ---
 

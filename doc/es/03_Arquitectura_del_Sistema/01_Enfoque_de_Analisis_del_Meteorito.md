@@ -11,9 +11,8 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🧩 Entradas y Fuentes
 
-- **Entradas de usuario:** ID/fecha objetivo, selección de NEO(s), o parámetros manuales (diámetro, densidad, velocidad, epoch).  
-- **NASA NEO API:** elementos orbitales keplerianos (a, e, i, Ω, ω, M/ν), tamaño, velocidad, MOID/miss distance, ventanas de aproximación.  
-- **Catálogo auxiliar (opcional):** densidad por tipo de asteroide (C/S/M) para estimar masa.
+- **Entradas de usuario:** Fecha objetivo, selección de NEO(s), o parámetros manuales (diámetro, densidad, velocidad, epoch).
+- **NASA NEO API:** Elementos orbitales keplerianos (a, e, i, Ω, ω, M/ν), tamaño, velocidad, MOID/miss distance, ventanas de aproximación.
 
 ---
 
@@ -47,8 +46,8 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
   - `0 < e < 1`  
   - `a > 0`  
   - `0 ≤ i ≤ π`  
-- Cálculo de promedios si existen rangos de diámetro.  
-- Corrección de inconsistencias menores (clamp).  
+- Cálculo de promedios si existen rangos de diámetro.
+- Corrección de inconsistencias menores (clamp).
 
 **Output parcial:** `NeoStateRaw` (datos limpios y consistentes)
 
@@ -56,13 +55,13 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🧮 3) Estimaciones Físicas
 
-- **Diámetro efectivo (D)**: media ponderada si hay rango.  
-- **Densidad (ρ)**: según tipo (C/S/M) o valor por defecto (3000 kg/m³).  
-- **Masa:**  
-  \( m = ρ \cdot \frac{π}{6} D^3 \)  
-- **Energía cinética:**  
-  \( E = \frac{1}{2} m v^2 \)  
-  Convertida a megatones TNT (1 MT = 4.184×10¹⁵ J).  
+- **Diámetro efectivo (D)**: media ponderada si hay rango.
+- **Densidad (ρ)**: según tipo (C/S/M) o valor por defecto (3000 kg/m³).
+- **Masa:**
+  \( m = ρ \cdot \frac{π}{6} D^3 \)
+- **Energía cinética:**
+  \( E = \frac{1}{2} m v^2 \)
+  Convertida a megatones TNT (1 MT = 4.184×10¹⁵ J).
 
 **Output parcial:** `PhysicalEstimate`
 
@@ -70,9 +69,9 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🛰️ 4) Propagación Orbital (Efemérides)
 
-- Modelo **kepleriano** (dos cuerpos).  
-- Propagación en pasos Δt (por ejemplo, 6 horas).  
-- Conversión a sistemas de referencia ECI/ECEF para proyección sobre la Tierra.  
+- Modelo **kepleriano** (dos cuerpos).
+- Propagación en pasos Δt (por ejemplo, 6 horas).
+- Conversión a sistemas de referencia ECI/ECEF para proyección sobre la Tierra.
 
 **Output parcial:** `Ephemeris[]` → posiciones y velocidades temporales.
 
@@ -80,9 +79,9 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🌍 5) Detección de aproximaciones e intersecciones
 
-- Cálculo de **distancia mínima** entre trayectoria del NEO y la Tierra.  
-- Identificación de **encuentros cercanos** (mínimos locales).  
-- Si existe intersección: estimación del punto y tiempo de entrada atmosférica.  
+- Cálculo de **distancia mínima** entre trayectoria del NEO y la Tierra.
+- Identificación de **encuentros cercanos** (mínimos locales).
+- Si existe intersección: estimación del punto y tiempo de entrada atmosférica.
 
 **Output parcial:**  
 `EncounterReport` → { `min_distance`, `t_min`, `intersection_flag` }
@@ -91,11 +90,11 @@ Obtener, validar y propagar los parámetros orbitales y físicos de uno o varios
 
 ## 🔧 6) Estimación de Δv y ventanas de mitigación
 
-- Simula variaciones pequeñas de velocidad (Δv) para analizar desviaciones orbitales.  
-- Calcula **ventanas de lanzamiento** y tiempos de vuelo estimados.  
-- Define una métrica de **"desviabilidad"** entre 0–1 basada en tiempo disponible y Δv necesario.  
+- Simula variaciones pequeñas de velocidad (Δv) para analizar desviaciones orbitales.
+- Calcula **ventanas de lanzamiento** y tiempos de vuelo estimados.
+- Define una métrica de **"desviabilidad"** entre 0–1 basada en tiempo disponible y Δv necesario.
 
-**Output parcial:**  
+**Output parcial:**
 `MitigationKinematics` → { `delta_v_req_est`, `windows`, `deviability_score` }
 
 ---
